@@ -1,1 +1,2 @@
-# NumPy_Test
+# NumPy Test
+Getting started with NumPy
