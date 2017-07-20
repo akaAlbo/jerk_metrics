@@ -1,2 +1,2 @@
-# NumPy Test
-Getting started with NumPy
+# Testing the SciPy library
+Getting started with NumPy, SciPy, Matplotlib
