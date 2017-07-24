@@ -1,16 +1,18 @@
 #!/usr/bin/python
+
 """
 Created on Jul 10, 2017
 
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.4.1
+@version: 1.5.1
 """
 
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 from scipy import signal
 
 
@@ -39,7 +41,7 @@ def plot1figure(xAxis, yAxis, legendLabel='legend label', xLabel='x-axis label',
         if axSize != 'auto':
             plt.axis(axSize)
 
-        plt.legend()
+        plt.legend(fontsize=15)
         plt.savefig(title + '.pdf', bbox_inches='tight')
 
         # increment figure number counter
@@ -62,7 +64,6 @@ def plot2Subplots(xAxis, yAxis1, yAxis2, legendLabel1='first legend label', lege
     @param yLabel1: label for first y-axis (e.g. '$v [m/s]$', for given example above)
     @param yLabel2: label for second y-axis (e.g. '$v [m/s]$', for given example above)
     @param title: title of the plot (obviously)
-    @param n: number of figure
     @param axSize: 'auto' means min and max is chosen automatically, otherwise: [x_min, x_max, y_min, y_max]
     @param show: shall plot be shown? 1: yes / 2: no
     @return: nothing
@@ -133,7 +134,7 @@ def show_figures():
                   '$\mathrm{a\;[m/s^2]}$', 'Diff_Grad', axSize='auto', show=0)
 
     # plot acceleration smoothed and noisy signal
-    plot2Subplots(A[:, AD.TIME], smooth(A_grad_acc[:, ], 30, window='hanning'),
+    plot2Subplots(A[:, AD.TIME], A_grad_acc_smo[:, ],
                   A_grad_acc[:, ], '$a_{grad,smoothed}$', '$a_{grad,noisy}$',
                   'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
                   'Acceleration', axSize=[0, 80, -.1, 1.0], show=0)
@@ -144,15 +145,26 @@ def show_figures():
                   title='Acceleration: x,y direction', show=0)
 
     # plot jerk smoothed and noisy: 30 is good value for smoothing
-    plot2Subplots(A[:, AD.TIME], smooth(A_grad_jerk[:, ], 30, window='hanning'),
+    plot2Subplots(A[:, AD.TIME], A_grad_smo_jerk[:, ],
                   A_grad_jerk[:, ], '$j_{grad,smoothed}$', '$j_{grad,noisy}$',
                   'Time [s]', '$\mathrm{j\;[m/s^3]}$', '$\mathrm{j\;[m/s^3]}$',
-                  'Jerk', axSize=[0, 80, -.5, 15], show=0)
+                  'Jerk', axSize=[0, 80, -.5, 15], show=1)
+
+    # plot complete jerk smoothed
+    plot1figure(A[:, AD.TIME], A_grad_smo_jerk,
+                '$j_{grad,smoothed,30}$', 'Time [s]', 'j $[m/s^3]$', 'Jerk Smoothed',
+                axSize='auto', show=0)
+
+    # plot velocity and jerk
+    plot2Subplots(A[:, AD.TIME], np.sqrt(A[:, AD.VEL_X] ** 2 + A[:, AD.VEL_Y] ** 2),
+                  A_grad_smo_jerk, '$v_{A}$', '$j_{grad,smooth,30}$', 'Time [s]',
+                  'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=1)
+
     plt.show()
 
 
-# plot smoothing comparison with different parameter for smoothing
-def smoothing_plot():
+# plot smoothing comparison between 1x and 2x smoothing
+def smoothing_times_plot():
     global n
     plt.figure(n, figsize=(16.0, 10.0))
     plt.plot(A[:, AD.TIME], A[:, AD.VEL_X], 'r',
@@ -163,16 +175,17 @@ def smoothing_plot():
         smooth(A[:, AD.VEL_X], 10, window='hanning'),
         50, window='hamming'), label='$v_{smooth,2\,times}$')
     plt.grid(True)
-    plt.xlabel('Time [s]')
-    plt.ylabel('v [m/s]')
-    plt.legend()
+    plt.xlabel('Time [s]', fontsize=20)
+    plt.ylabel('v [m/s]', fontsize=20)
+    plt.title('Smoothing Comparison', fontsize=20)
+    plt.legend(fontsize=15)
     plt.savefig('smoothing_plot.pdf', bbox_inches='tight')
 
     # increment figure counter
     n += 1
 
 
-# plot jerk comparison between smothed and noisy signal
+# plot jerk comparison between smoothed and noisy signal
 def jerk_comparison():
     global n
     plt.figure(n, figsize=(16.0, 10.0))
@@ -181,36 +194,17 @@ def jerk_comparison():
                  label='$j_{grad,smooth,' + str(i) + '}$')
         plt.xlabel('Time [s]', fontsize=20)
         plt.ylabel('j $[m/s^3]$', fontsize=20)
-        plt.legend(fontsize=15)
         plt.grid(True)
+
+    plt.plot(A[:, AD.TIME], bandwidth(4.5), 'k--', label='$Bandwidth$')
     plt.title('Jerk comparison different smoothing', fontsize=20)
+    plt.legend(fontsize=15)
     plt.axis([18, 23, -.5, 7])
     plt.draw()
     plt.savefig('jerk_comparison.pdf', bbox_inches='tight')
 
     # increment figure counter
     n += 1
-
-
-def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = signal.butter(order, [low, high], btype='low')
-    return b, a
-
-
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    """
-    @param data: data to filter
-    @param lowcut: lowpass cutoff frequency
-    @param highcut: highpass cutoff frequency
-    @param fs: sample rate
-    @param order: order of butterworth filter
-    """
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = signal.lfilter(b, a, data)
-    return y
 
 
 # AD stands for ArrayData
@@ -287,6 +281,19 @@ def read_data():
     global A
     global m_A
     global n_A
+
+    # save header names for further use
+    time = '%time'
+    hs = 'field.header.seq'
+    fhs = 'field.header.stamp'  # stamp for calculating differentiation
+    vel_x = 'field.twist.twist.linear.x'  # velocity x-direction
+    vel_y = 'field.twist.twist.linear.y'  # velocity y-direction
+    ome_z = 'field.twist.twist.angular.z'  # omega around z-axis
+    pos_x = 'field.pose.pose.position.x'  # position x-axis
+    pos_y = 'field.pose.pose.position.y'  # position y-axis
+
+    data = [time, hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
+
     with open('Ingolstadt_Test3.csv', 'rb') as csvfile:
         odometry_reader = csv.DictReader(csvfile, delimiter=',')
         # column_names_csv is of type 'list'
@@ -329,106 +336,139 @@ def read_data():
 def differentiation():
     global A_grad
     global A_grad_vel
+    global A_grad_vel_smo
     global A_grad_vel_x
     global A_grad_vel_y
     global A_grad_acc
+    global A_grad_acc_smo
     global A_grad_acc_x
     global A_grad_acc_y
     global A_grad_jerk
+    global A_grad_jerk_smo
     global A_grad_jerk_x
     global A_grad_jerk_y
 
     global A_diff
 
+    global A_grad_smo_acc
+    global A_grad_smo_jerk
 
     # differentiation
     A_grad_vel_x = np.gradient(A[:, AD.POS_X], A[1, AD.FHS] - A[0, AD.FHS])
     A_grad_vel_y = np.gradient(A[:, AD.POS_Y], A[1, AD.FHS] - A[0, AD.FHS])
     # (x^2+y^2)^0.5 to get absolut velocity
     A_grad_vel = np.sqrt(A_grad_vel_x[:, ] ** 2 + A_grad_vel_y[:, ] ** 2)
+    A_grad_vel_smo = smooth(A_grad_vel[:, ], smo_para, window='hanning')
 
     # differentiation
     # compute acceleration from velocity by differentiation
     A_grad_acc_x = np.gradient(A[:, AD.VEL_X], A[1, AD.FHS] - A[0, AD.FHS])
     A_grad_acc_y = np.gradient(A[:, AD.VEL_Y], A[1, AD.FHS] - A[0, AD.FHS])
-    # (x^2+y^2)^0.5 to get absolut acceleration
+    # (x^2+y^2)^0.5 to get absolute acceleration
     A_grad_acc = np.sqrt(A_grad_acc_x[:, ] ** 2 + A_grad_acc_y[:, ] ** 2)
+    # smoothed after differentiation
+    A_grad_acc_smo = smooth(A_grad_acc[:, ], smo_para, window='hanning')
+    # smoothed acc used for (x^2+y^2)^0.5 to get absolute acceleration
+    A_grad_smo_acc = np.sqrt(smooth(A_grad_acc_x[:, ], 30, window='hanning') ** 2 +
+                             smooth(A_grad_acc_y[:, ], 30, window='hanning') ** 2)
 
     # differentiation
     # compute jerk from acceleration by differentiation
     A_grad_jerk_x = np.gradient(A_grad_acc_x[:, ], A[1, AD.FHS] - A[0, AD.FHS])
+    A_grad_smo_jerk_x = np.gradient(smooth(A_grad_acc_x[:, ], 30, window='hanning'),
+                                    A[1, AD.FHS] - A[0, AD.FHS])
+    # noisy acc used for differentiation
     A_grad_jerk_y = np.gradient(A_grad_acc_y[:, ], A[1, AD.FHS] - A[0, AD.FHS])
+    # smoothed acc used for differentiation
+    A_grad_smo_jerk_y = np.gradient(smooth(A_grad_acc_y[:, ], 30, window='hanning'),
+                                    A[1, AD.FHS] - A[0, AD.FHS])
     # (x^2+y^2)^0.5 to get absolut jerk
     A_grad_jerk = np.sqrt(A_grad_jerk_x[:, ] ** 2 + A_grad_jerk_y[:, ] ** 2)
+    # smoothed after differentiation
+    A_grad_jerk_smo = smooth(A_grad_jerk[:, ], 30, window='hanning')
+    # smoothed acc used for differentiation
+    A_grad_smo_jerk = np.sqrt(A_grad_smo_jerk_x[:, ] ** 2 + A_grad_smo_jerk_y[:, ] ** 2)
 
     # differentiation using diff
     A_diff = np.diff(np.transpose(A))
-    print 'm * n of A_grad:\t', A_grad_acc.shape
-    print 'm * n of A:\t\t', A.shape
-    print 'n * m of A_diff:\t', A_diff.shape
     A_diff = np.transpose(A_diff)
 
 
+# creating bandwidth matrix
+def bandwidth(max):
+    B = np.zeros([m_A, 1])
+    for i in xrange(0, m_A):
+        B[i, 0] = max
+    return B
+
+
+# compare jerk with given max bandwidth, if jerk is to big function returns false
+def jerk_metrics(max_jerk):
+    B = bandwidth(max_jerk)
+    for i in xrange(0, m_A):
+        if A_grad_smo_jerk[i,] >= max_jerk:
+            print '\nJerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
+                  'allowed jerk: {:.3f} [m/s^3]'.format(A_grad_smo_jerk[i,],
+                                                        A[i, AD.TIME], max_jerk)
+            print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} s is in ' \
+                  'range'.format(A_grad_smo_jerk[i - 1,], A[i - 1, AD.TIME])
+            print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
+            return False
+    print '\nJerk is in desired range!'
+    print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
+    return True
+
+
+# smoothing in workflow comparison
+def smoothing_workflow_comparison():
+    global n
+    plt.figure(n, figsize=(16.0, 10.0))
+    plt.subplot(211)
+    plt.plot(A[:, AD.TIME], A_grad_acc, 'b', label='unsmoothed')
+    plt.plot(A[:, AD.TIME], A_grad_acc_smo, 'k', label='smoothed after differentiation')
+    plt.plot(A[:, AD.TIME], A_grad_smo_acc, 'r', label='smoothed acc x and y used')
+    plt.ylabel('a $[m/s^2]$', fontsize=20)
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(212)
+    plt.plot(A[:, AD.TIME], A_grad_jerk, 'b', label='unsmoothed')
+    plt.plot(A[:, AD.TIME], A_grad_jerk_smo, 'k', label='smoothed after differentiation')
+    plt.plot(A[:, AD.TIME], A_grad_smo_jerk, 'r', label='smoothed acc used for differentiation')
+    plt.ylabel('j $[m/s^3]$', fontsize=20)
+    plt.grid(True)
+
+    plt.xlabel('Time [s]', fontsize=20)
+    plt.legend()
+    plt.draw()
+    plt.savefig('smoothing_in_workflow_comparison.pdf', bbox_inches='tight')
+    n += 1
+
+
+# calling the other functions
 def main():
-    smoothing_plot()
-    jerk_comparison()
+    # close all existing figures
+    plt.close("all")
+    read_data()
+    differentiation()
+    # smoothing_times_plot()
+    # jerk_comparison()
+    # smoothing_workflow_comparison()
     show_figures()
 
 
-# close all existing figures
-plt.close("all")
-
 # number counter for figures
 n = 1
-
-# save header names for further use
-time = '%time'
-hs = 'field.header.seq'
-fhs = 'field.header.stamp'  # stamp for calculating differentiation
-vel_x = 'field.twist.twist.linear.x'  # velocity x-direction
-vel_y = 'field.twist.twist.linear.y'  # velocity y-direction
-ome_z = 'field.twist.twist.angular.z'  # omega around z-axis
-pos_x = 'field.pose.pose.position.x'  # position x-axis
-pos_y = 'field.pose.pose.position.y'  # position y-axis
-
-data = [time, hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
+# smoothing parameter value [30 is good value]
+smo_para = 30
 
 if __name__ == '__main__':
-    read_data()
-    differentiation()
-
-    # ===========================================================================
-    # b1, a1 = signal.butter(5, .01)
-    # y1 = signal.filtfilt(b1, a1, A[:, AD.VEL_X])
-    # plt.figure(3)
-    # plt.plot(A[:, AD.TIME], A[:, AD.VEL_X], 'b', alpha=0.75)
-    # plt.plot(A[:, AD.TIME], y1, 'k')
-    # plt.legend(('noisy signal', 'filtfilt'), loc='best')
-    # plt.savefig('butterworth_lowpass.png', bbox_inches='tight')
-    # plt.show()
-    # ===========================================================================
-
-    fs = 50
-    lowcut = 1
-    highcut = 10
-
-    # ===========================================================================
-    # y = butter_bandpass_filter(A[:, AD.VEL_X], lowcut, highcut, fs, order=6)
-    # plt.plot(A[:, AD.TIME], y, 'r', label='Filtered signal (%g Hz)' % 50)
-    # plt.xlabel('time (seconds)')
-    # plt.grid(True)
-    # plt.axis('tight')
-    # plt.legend(loc='upper left')
-    # plt.draw()
-    # plt.savefig('butterworth_bandpass.png', bbox_inches='tight')
-    # plt.show()
-    # ===========================================================================
-
     main()
-
+    if 'jerk' in sys.argv[1]:
+        jerk = sys.argv[1]
+        max_jerk = float(jerk[6:])
+    jerk_metrics(max_jerk)
 pass
 
-# TODO: 2. bandwith for jerk
-# TODO: 3. bool if jerk lower bandwith
-# TODO: 4. output if data smaller jerk bandwith max
-# REVIEW: butterworth bandpass plots as pdf
+# TODO:
+# REVIEW:
