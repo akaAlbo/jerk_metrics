@@ -17,7 +17,7 @@ jerk_metrics(max_jerk)
 ```
 function. Max jerk value has to be determined empirically.
 
-### History
+## History
 **V 1.5.3:**
 - added full terminal support. Command-line arguments now supported, such as
 ```
