@@ -6,13 +6,14 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.5.2
+@version: 1.6.0
 """
 
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import listener as listener
 
 
 # plot data in one figure
@@ -288,7 +289,7 @@ def smooth(x, window_len=11, window='hanning'):
 
 
 # read data from .csv-file
-def read_data():
+def read_data_csv():
     global A
     global m_A
     global n_A
@@ -341,6 +342,30 @@ def read_data():
     m_A, n_A = A.shape
 
     print 'Time of Interval: {:.2f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
+
+
+def read_data_subscriber():
+    global A
+    global m_A
+    global n_A
+
+    # save header names for further use
+    hs = 'data.header.seq'
+    fhs = 'data.header.stamp'  # stamp for calculating differentiation
+    vel_x = 'data.twist.twist.linear.x'  # velocity x-direction
+    vel_y = 'data.twist.twist.linear.y'  # velocity y-direction
+    ome_z = 'data.twist.twist.angular.z'  # omega around z-axis
+    pos_x = 'data.pose.pose.position.x'  # position x-axis
+    pos_y = 'data.pose.pose.position.y'  # position y-axis
+
+    data = [hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
+
+    listener.listener()
+    A = np.array(listener.return_array())
+    print 'Got this array: ', A.shape
+
+
+
 
 
 # get differentiation from given data
@@ -459,8 +484,9 @@ def smoothing_workflow_comparison():
 def main():
     # close all existing figures
     plt.close('all')
-    read_data()
-    differentiation()
+    # read_data_csv()
+    # differentiation()
+    read_data_subscriber()
     # smoothing_times_plot()
     # jerk_comparison()
     # smoothing_workflow_comparison()
@@ -486,4 +512,5 @@ if __name__ == '__main__':
 pass
 
 # TODO: define good max jerk metrics value
-# REVIEW: 
+# TODO: listener to rostopic /base/odometry_controller
+# REVIEW:
