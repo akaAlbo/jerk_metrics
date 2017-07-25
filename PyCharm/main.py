@@ -6,14 +6,13 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.5.1
+@version: 1.5.2
 """
 
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from scipy import signal
 
 
 # plot data in one figure
@@ -105,7 +104,7 @@ def show_figures():
                   '$Pos_x$', '$Pos_y$', 'Time [s]', 'x [m]',
                   'x [m]', 'Position', axSize='auto', show=0)
 
-    # plot velocity
+    # plot velocity odometry controller
     plot2Subplots(A[:, AD.TIME], A[:, AD.VEL_X], A[:, AD.VEL_Y],
                   '$v_x$', '$v_y$', 'Time [s]', 'v [m/s]', 'v [m/s]',
                   title='Velocity', show=0)
@@ -148,17 +147,17 @@ def show_figures():
     plot2Subplots(A[:, AD.TIME], A_grad_smo_jerk[:, ],
                   A_grad_jerk[:, ], '$j_{grad,smoothed}$', '$j_{grad,noisy}$',
                   'Time [s]', '$\mathrm{j\;[m/s^3]}$', '$\mathrm{j\;[m/s^3]}$',
-                  'Jerk', axSize=[0, 80, -.5, 15], show=1)
+                  'Jerk', axSize=[0, 80, -.5, 15], show=0)
 
     # plot complete jerk smoothed
     plot1figure(A[:, AD.TIME], A_grad_smo_jerk,
                 '$j_{grad,smoothed,30}$', 'Time [s]', 'j $[m/s^3]$', 'Jerk Smoothed',
-                axSize='auto', show=0)
+                axSize='auto', show=1)
 
     # plot velocity and jerk
     plot2Subplots(A[:, AD.TIME], np.sqrt(A[:, AD.VEL_X] ** 2 + A[:, AD.VEL_Y] ** 2),
                   A_grad_smo_jerk, '$v_{A}$', '$j_{grad,smooth,30}$', 'Time [s]',
-                  'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=1)
+                  'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=0)
 
     plt.show()
 
@@ -217,6 +216,18 @@ class AD(enumerate):
     OME_Z = 5
     POS_X = 6
     POS_Y = 7
+
+
+# colours in terminal prints
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 def smooth(x, window_len=11, window='hanning'):
@@ -404,17 +415,16 @@ def bandwidth(max):
 
 # compare jerk with given max bandwidth, if jerk is to big function returns false
 def jerk_metrics(max_jerk):
-    B = bandwidth(max_jerk)
     for i in xrange(0, m_A):
         if A_grad_smo_jerk[i,] >= max_jerk:
-            print '\nJerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
-                  'allowed jerk: {:.3f} [m/s^3]'.format(A_grad_smo_jerk[i,],
-                                                        A[i, AD.TIME], max_jerk)
+            output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
+                                    'allowed jerk: {:.3f} [m/s^3]' + bcolors.ENDC
+            print output.format(A_grad_smo_jerk[i,], A[i, AD.TIME], max_jerk)
             print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} s is in ' \
                   'range'.format(A_grad_smo_jerk[i - 1,], A[i - 1, AD.TIME])
             print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
             return False
-    print '\nJerk is in desired range!'
+    print bcolors.OKGREEN + 'Jerk is in desired range!' + bcolors.ENDC
     print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
     return True
 
@@ -448,13 +458,13 @@ def smoothing_workflow_comparison():
 # calling the other functions
 def main():
     # close all existing figures
-    plt.close("all")
+    plt.close('all')
     read_data()
     differentiation()
     # smoothing_times_plot()
     # jerk_comparison()
     # smoothing_workflow_comparison()
-    show_figures()
+    # show_figures()
 
 
 # number counter for figures
@@ -462,14 +472,18 @@ n = 1
 # smoothing parameter value [30 is good value]
 smo_para = 30
 
+
+# commandline input: -jerk=*max_jerk*
+# if no commandline input is given, max_jerk=4.0 is set
 if __name__ == '__main__':
     main()
-    if 'jerk' in sys.argv[1]:
+    if len(sys.argv) > 1:
         jerk = sys.argv[1]
         max_jerk = float(jerk[6:])
-    jerk_metrics(max_jerk)
+        jerk_metrics(max_jerk)
+    else:
+        jerk_metrics(4.0)
 pass
 
-# TODO:
-# TODO:
-# REVIEW:
+# TODO: define good max jerk metrics value
+# REVIEW: 
