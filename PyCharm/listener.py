@@ -56,25 +56,28 @@ def callback(data):
     # rospy.loginfo(rospy.get_caller_id() + 'twist linear x: %s', data.twist.twist.linear.x)
     # rospy.loginfo(rospy.get_caller_id() + 'twist linear y: %s', data.twist.twist.linear.y)
     # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
-    data_list = [data.header.seq,
-                 data.header.stamp,
-                 data.twist.twist.linear.x,
-                 data.twist.twist.linear.y,
-                 data.twist.twist.angular.z,
-                 data.pose.pose.position.x,
-                 data.pose.pose.position.y]
+    data_list = [-1,  # no %time in odometry message
+                 float(data.header.seq),
+                 (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
+                 float(data.twist.twist.linear.x),
+                 float(data.twist.twist.linear.y),
+                 float(data.twist.twist.angular.z),
+                 float(data.pose.pose.position.x),
+                 float(data.pose.pose.position.y)]
 
     # append data to array
     A_listener = np.append(A_listener, [[data_list[0], data_list[1], data_list[2], data_list[3],
-                                        data_list[4], data_list[5], data_list[6]]], axis=0)
+                                         data_list[4], data_list[5], data_list[6], data_list[7]]],
+                           axis=0)
 
     # print 'Pos x: {} [float]'.format(data.pose.pose.position.x)
     print A_listener.shape
     # print 'Pos x: {} [Array]'.format(A_listener[-1, 0])
 
-# REVIEW: last time 'self' argument was wrong
+
 def return_array():
-    return A_listener
+    # deletes first row of array, because first row is only 1
+    return np.delete(A_listener, 0, 0)
 
 
 def listener():
@@ -87,7 +90,7 @@ def listener():
 
     global A_listener
     # create array for further use
-    A_listener = np.ones([1, 7], dtype=np.double)
+    A_listener = np.ones([1, 8], dtype=np.double)
 
     # multiple options for Odometry msg type
     # Odometry.pose.pose.position.x
