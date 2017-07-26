@@ -6,6 +6,20 @@ Writing a python programm to get the "/base/odometry_controller"-speed and use i
 All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "Plots", named according to plotted data. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
 
+### ROS Subscriber Support
+Included subscriber to ROS-topic '/base/odometry_controller/' topic, of type 'nav_msgs.msg' as 'Odometry.msg'. 
+Access data via:
+```
+data.header.seq
+data.header.stamp
+data.twist.twist.linear.x
+data.twist.twist.linear.y
+data.twist.twist.angular.z
+data.pose.pose.position.x
+data.pose.pose.position.y
+```
+
+
 ### Terminal
 Command-line support for max allowed jerk value given to metrics. Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
 ```
