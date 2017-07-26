@@ -435,6 +435,11 @@ def bandwidth(max):
 
 # compare jerk with given max bandwidth, if jerk is to big function returns false
 def jerk_metrics(max_jerk):
+    '''
+    jerk metrics to see if max jerk is in desired range
+    :param max_jerk: max allowed jerk for comparison
+    :return: false --
+    '''
     for i in xrange(0, m_A):
         if A_grad_smo_jerk[i,] >= max_jerk:
             output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \

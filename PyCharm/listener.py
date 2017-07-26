@@ -58,7 +58,7 @@ def callback(data):
     # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
     data_list = [-1,  # no %time in odometry message
                  float(data.header.seq),
-                 (float(data.header.stamp.secs)*10**9 + float(data.header.stamp.nsecs))*10**-9,
+                 (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
                  float(data.twist.twist.linear.x),
                  float(data.twist.twist.linear.y),
                  float(data.twist.twist.angular.z),
