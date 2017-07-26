@@ -361,6 +361,7 @@ def read_data_subscriber():
     data = [hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
 
     listener.listener()
+    # REVIEW: problem with return array function: TypeError: return_array() takes exactly 1 argument (0 given)
     A = np.array(listener.return_array())
     print 'Got this array: ', A.shape
 

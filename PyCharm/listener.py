@@ -72,8 +72,8 @@ def callback(data):
     print A_listener.shape
     # print 'Pos x: {} [Array]'.format(A_listener[-1, 0])
 
-
-def return_array(self):
+# REVIEW: last time 'self' argument was wrong
+def return_array():
     return A_listener
 
 
