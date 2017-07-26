@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.6.0
+@version: 1.6.1
 """
 
 import csv
@@ -151,7 +151,7 @@ def show_figures():
                   'Jerk', axSize=[0, 80, -.5, 15], show=0)
 
     # plot complete jerk smoothed
-    plot1figure(A[:, AD.TIME], A_grad_smo_jerk,
+    plot1figure(A[:, AD.FHS], A_grad_smo_jerk,
                 '$j_{grad,smoothed,30}$', 'Time [s]', 'j $[m/s^3]$', 'Jerk Smoothed',
                 axSize='auto', show=1)
 
@@ -209,14 +209,14 @@ def jerk_comparison():
 
 # AD stands for ArrayData
 class AD(enumerate):
-    TIME = 0
-    HS = 1
-    FHS = 2
-    VEL_X = 3
-    VEL_Y = 4
-    OME_Z = 5
-    POS_X = 6
-    POS_Y = 7
+    TIME = 0  # time = '%time'
+    HS = 1  # hs = 'field.header.seq'
+    FHS = 2  # fhs = 'field.header.stamp'  # stamp for calculating differentiation
+    VEL_X = 3  # velocity x-direction
+    VEL_Y = 4  # velocity y-direction
+    OME_Z = 5  # omega around z-axis
+    POS_X = 6  # position x-axis
+    POS_Y = 7  # position y-axis
 
 
 # colours in terminal prints
@@ -338,10 +338,12 @@ def read_data_csv():
 
     # set time to start at 0s
     A[:, AD.TIME] = A[:, AD.TIME] - A[0, AD.TIME]
+    A[:, AD.FHS] = A[:, AD.FHS] - A[0, AD.FHS]
     # save dimensions of A
     m_A, n_A = A.shape
 
-    print 'Time of Interval: {:.2f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
+    print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
+    print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.FHS] - A[0, AD.FHS])
 
 
 def read_data_subscriber():
@@ -349,24 +351,16 @@ def read_data_subscriber():
     global m_A
     global n_A
 
-    # save header names for further use
-    hs = 'data.header.seq'
-    fhs = 'data.header.stamp'  # stamp for calculating differentiation
-    vel_x = 'data.twist.twist.linear.x'  # velocity x-direction
-    vel_y = 'data.twist.twist.linear.y'  # velocity y-direction
-    ome_z = 'data.twist.twist.angular.z'  # omega around z-axis
-    pos_x = 'data.pose.pose.position.x'  # position x-axis
-    pos_y = 'data.pose.pose.position.y'  # position y-axis
-
-    data = [hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
-
     listener.listener()
-    # REVIEW: problem with return array function: TypeError: return_array() takes exactly 1 argument (0 given)
     A = np.array(listener.return_array())
-    print 'Got this array: ', A.shape
+    print bcolors.OKBLUE + 'Got this array: ', A.shape, bcolors.ENDC
 
+    # set time to start at 0s
+    A[:, AD.FHS] = A[:, AD.FHS] - A[0, AD.FHS]
+    # save dimensions of A
+    m_A, n_A = A.shape
 
-
+    print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.FHS] - A[0, AD.FHS])
 
 
 # get differentiation from given data
@@ -486,8 +480,8 @@ def main():
     # close all existing figures
     plt.close('all')
     # read_data_csv()
-    # differentiation()
     read_data_subscriber()
+    differentiation()
     # smoothing_times_plot()
     # jerk_comparison()
     # smoothing_workflow_comparison()
@@ -498,7 +492,6 @@ def main():
 n = 1
 # smoothing parameter value [30 is good value]
 smo_para = 30
-
 
 # commandline input: -jerk=*max_jerk*
 # if no commandline input is given, max_jerk=4.0 is set
