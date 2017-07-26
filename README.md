@@ -7,7 +7,11 @@ All generated plots are saved as pdf-file for further usage. The archive file in
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
 
 ### ROS Subscriber Support
-Included subscriber to ROS-topic '/base/odometry_controller/' topic, of type 'nav_msgs.msg' as 'Odometry.msg'. 
+Included subscriber to ROS-topic 
+```
+/base/odometry_controller/
+```
+topic, of type 'nav_msgs.msg' as 'Odometry.msg'. 
 Access data via:
 ```
 data.header.seq
@@ -18,7 +22,11 @@ data.twist.twist.angular.z
 data.pose.pose.position.x
 data.pose.pose.position.y
 ```
-
+"stamp" data is given in seconds and nanoseconds. Listener is wizard and calculates one time value.
+```
+data.header.stamp.secs
+data.header.stamp.nsecs
+```
 
 ### Terminal
 Command-line support for max allowed jerk value given to metrics. Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
@@ -36,6 +44,12 @@ jerk_metrics(max_jerk)
 function. Max jerk value has to be determined empirically.
 
 ## History
+**V 1.6.1:**
+- bug fixing (time calculating bug because of nanoseconds in timestamp)
+
+**V 1.6.0:**
+- added full rostopic subscriber support
+
 **V 1.5.3:**
 - added full terminal support. Command-line arguments now supported, such as
 ```
