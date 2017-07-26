@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.6.1
+@version: 1.6.2
 """
 
 import csv
@@ -101,54 +101,54 @@ def plot2Subplots(xAxis, yAxis1, yAxis2, legendLabel1='first legend label', lege
 # plot the specified figures
 def show_figures():
     # plot position
-    plot2Subplots(A[:, AD.TIME], A[:, AD.POS_X], A[:, AD.POS_Y],
+    plot2Subplots(A[:, AD.FHS], A[:, AD.POS_X], A[:, AD.POS_Y],
                   '$Pos_x$', '$Pos_y$', 'Time [s]', 'x [m]',
                   'x [m]', 'Position', axSize='auto', show=0)
 
     # plot velocity odometry controller
-    plot2Subplots(A[:, AD.TIME], A[:, AD.VEL_X], A[:, AD.VEL_Y],
+    plot2Subplots(A[:, AD.FHS], A[:, AD.VEL_X], A[:, AD.VEL_Y],
                   '$v_x$', '$v_y$', 'Time [s]', 'v [m/s]', 'v [m/s]',
                   title='Velocity', show=0)
 
     # plot velocity (x^2+y^2)^0.5 diff
-    plot2Subplots(A[:-1, AD.TIME], np.sqrt(A_diff[:, AD.POS_X] ** 2 + A_diff[:, AD.POS_Y] ** 2),
+    plot2Subplots(A[:-1, AD.FHS], np.sqrt(A_diff[:, AD.POS_X] ** 2 + A_diff[:, AD.POS_Y] ** 2),
                   np.sqrt(A[:-1, AD.VEL_X] ** 2 + A[:-1, AD.VEL_Y] ** 2),
                   '$v_{x,diff,root}$', '$v_{x,odo,root}$', 'Time [s]', 'v [m/s]', 'v [m/s]',
                   title='Velocity calculated using \'diff\'', show=0)
 
     # plot velocity (x^2+y^2)^0.5 gradient
-    plot2Subplots(A[:, AD.TIME], A_grad_vel[:, ],
+    plot2Subplots(A[:, AD.FHS], A_grad_vel[:, ],
                   np.sqrt(A[:, AD.VEL_X] ** 2 + A[:, AD.VEL_Y] ** 2),
                   '$v_{x,grad,root}$', '$v_x{x,odo,root}$', 'Time [s]',
                   'v [m/s]', 'v [m/s]', title='Velocity calculated using \'gradient\'',
                   axSize=[0, 73, -.05, .3], show=0)
 
     # plot acceleration diff: x,y
-    plot2Subplots(A[:-1, AD.TIME], A_diff[:, AD.VEL_X], A_diff[:, AD.VEL_Y],
+    plot2Subplots(A[:-1, AD.FHS], A_diff[:, AD.VEL_X], A_diff[:, AD.VEL_Y],
                   '$a_x$', '$a_y$', 'Time [s]', '$\mathrm{a\quad[m/s^2]}$', '$\mathrm{a\quad[m/s^2]}$',
                   'Acceleration', axSize='auto', show=0)
 
     # plot diff and gradient method comparison for acceleration
-    plot2Subplots(A[:-1, AD.TIME], A_grad_acc[:-1, ], np.sqrt(A_diff[:, AD.VEL_X] ** 2 + A_diff[:, AD.VEL_Y] ** 2),
+    plot2Subplots(A[:-1, AD.FHS], A_grad_acc[:-1, ], np.sqrt(A_diff[:, AD.VEL_X] ** 2 + A_diff[:, AD.VEL_Y] ** 2),
                   '$a_{grad}$', '$a_{diff}$', 'Time [s]', '$\mathrm{a\;[m/s^2]}$',
                   '$\mathrm{a\;[m/s^2]}$', 'Diff_Grad', axSize='auto', show=0)
 
     # plot acceleration smoothed and noisy signal
-    plot2Subplots(A[:, AD.TIME], A_grad_acc_smo[:, ],
+    plot2Subplots(A[:, AD.FHS], A_grad_acc_smo[:, ],
                   A_grad_acc[:, ], '$a_{grad,smoothed}$', '$a_{grad,noisy}$',
                   'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
-                  'Acceleration', axSize=[0, 80, -.1, 1.0], show=0)
+                  'Acceleration', axSize=[0, 80, -.1, 1.0], show=1)
 
     # plot acceleration x,y separately
-    plot2Subplots(A[:, AD.TIME], A_grad_acc_x, A_grad_acc_y, '$a_{grad,x}$', '$a_{grad,y}$',
+    plot2Subplots(A[:, AD.FHS], A_grad_acc_x, A_grad_acc_y, '$a_{grad,x}$', '$a_{grad,y}$',
                   'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
                   title='Acceleration: x,y direction', show=0)
 
     # plot jerk smoothed and noisy: 30 is good value for smoothing
-    plot2Subplots(A[:, AD.TIME], A_grad_smo_jerk[:, ],
+    plot2Subplots(A[:, AD.FHS], A_grad_smo_jerk[:, ],
                   A_grad_jerk[:, ], '$j_{grad,smoothed}$', '$j_{grad,noisy}$',
                   'Time [s]', '$\mathrm{j\;[m/s^3]}$', '$\mathrm{j\;[m/s^3]}$',
-                  'Jerk', axSize=[0, 80, -.5, 15], show=0)
+                  'Jerk', axSize=[0, 80, -.5, 15], show=1)
 
     # plot complete jerk smoothed
     plot1figure(A[:, AD.FHS], A_grad_smo_jerk,
@@ -156,9 +156,9 @@ def show_figures():
                 axSize='auto', show=1)
 
     # plot velocity and jerk
-    plot2Subplots(A[:, AD.TIME], np.sqrt(A[:, AD.VEL_X] ** 2 + A[:, AD.VEL_Y] ** 2),
+    plot2Subplots(A[:, AD.FHS], np.sqrt(A[:, AD.VEL_X] ** 2 + A[:, AD.VEL_Y] ** 2),
                   A_grad_smo_jerk, '$v_{A}$', '$j_{grad,smooth,30}$', 'Time [s]',
-                  'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=0)
+                  'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=1)
 
     plt.show()
 
@@ -439,9 +439,9 @@ def jerk_metrics(max_jerk):
         if A_grad_smo_jerk[i,] >= max_jerk:
             output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
                                     'allowed jerk: {:.3f} [m/s^3]' + bcolors.ENDC
-            print output.format(A_grad_smo_jerk[i,], A[i, AD.TIME], max_jerk)
+            print output.format(A_grad_smo_jerk[i,], A[i, AD.FHS], max_jerk)
             print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} s is in ' \
-                  'range'.format(A_grad_smo_jerk[i - 1,], A[i - 1, AD.TIME])
+                  'range'.format(A_grad_smo_jerk[i - 1,], A[i - 1, AD.FHS])
             print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
             return False
     print bcolors.OKGREEN + 'Jerk is in desired range!' + bcolors.ENDC
@@ -506,5 +506,4 @@ if __name__ == '__main__':
 pass
 
 # TODO: define good max jerk metrics value
-# TODO: listener to rostopic /base/odometry_controller
 # REVIEW:
