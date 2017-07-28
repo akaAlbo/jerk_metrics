@@ -47,7 +47,7 @@ import numpy as np
 
 
 def callback(data):
-    global data_list
+    # global data_list
     global A_listener
     # rospy.loginfo(rospy.get_caller_id() + 'pos x: %s', data.pose.pose.position.x)
     # rospy.loginfo(rospy.get_caller_id() + 'pos y: %s', data.pose.pose.position.y)
