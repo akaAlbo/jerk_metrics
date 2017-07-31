@@ -13,7 +13,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import listener as listener
+import listener
 
 
 # plot data in one figure
@@ -351,8 +351,11 @@ def read_data_subscriber():
     global m_A
     global n_A
 
-    listener.listener()
-    A = np.array(listener.return_array())
+    # instantiate class NodeListener
+    nl = listener.NodeListener()
+    # subscribe to odometry
+    nl.listener()
+    A = np.array(nl.return_array())
     print bcolors.OKBLUE + 'Got this array: ', A.shape, bcolors.ENDC
 
     # set time to start at 0s
