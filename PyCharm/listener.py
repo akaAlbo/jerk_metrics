@@ -44,67 +44,74 @@ import rospy
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 import numpy as np
+import time
 
 
-def callback(data):
-    # global data_list
-    global A_listener
-    # rospy.loginfo(rospy.get_caller_id() + 'pos x: %s', data.pose.pose.position.x)
-    # rospy.loginfo(rospy.get_caller_id() + 'pos y: %s', data.pose.pose.position.y)
-    # rospy.loginfo(rospy.get_caller_id() + 'header stamp: %s', data.header.stamp)
-    # rospy.loginfo(rospy.get_caller_id() + 'header seq: %s', data.header.seq)
-    # rospy.loginfo(rospy.get_caller_id() + 'twist linear x: %s', data.twist.twist.linear.x)
-    # rospy.loginfo(rospy.get_caller_id() + 'twist linear y: %s', data.twist.twist.linear.y)
-    # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
-    data_list = [-1,  # no %time in odometry message
-                 float(data.header.seq),
-                 (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
-                 float(data.twist.twist.linear.x),
-                 float(data.twist.twist.linear.y),
-                 float(data.twist.twist.angular.z),
-                 float(data.pose.pose.position.x),
-                 float(data.pose.pose.position.y)]
+class NodeListener:
+    def __init__(self):
+        self.topic = '/base/odometry_controller/odometry'
+        self.start_time = time.time()
+        self.stop_time = None
+        # create array for further use
+        self.A_listener = np.ones([0, 8], dtype=np.double)
 
-    # append data to array
-    A_listener = np.append(A_listener, [[data_list[0], data_list[1], data_list[2], data_list[3],
-                                         data_list[4], data_list[5], data_list[6], data_list[7]]],
-                           axis=0)
+    def callback(self, data):
+        # global data_list
+        # rospy.loginfo(rospy.get_caller_id() + 'pos x: %s', data.pose.pose.position.x)
+        # rospy.loginfo(rospy.get_caller_id() + 'pos y: %s', data.pose.pose.position.y)
+        # rospy.loginfo(rospy.get_caller_id() + 'header stamp: %s', data.header.stamp)
+        # rospy.loginfo(rospy.get_caller_id() + 'header seq: %s', data.header.seq)
+        # rospy.loginfo(rospy.get_caller_id() + 'twist linear x: %s', data.twist.twist.linear.x)
+        # rospy.loginfo(rospy.get_caller_id() + 'twist linear y: %s', data.twist.twist.linear.y)
+        # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
+        data_list = [-1,  # no %time in odometry message
+                     float(data.header.seq),
+                     (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
+                     float(data.twist.twist.linear.x),
+                     float(data.twist.twist.linear.y),
+                     float(data.twist.twist.angular.z),
+                     float(data.pose.pose.position.x),
+                     float(data.pose.pose.position.y)]
 
-    # print 'Pos x: {} [float]'.format(data.pose.pose.position.x)
-    print A_listener.shape
-    # print 'Pos x: {} [Array]'.format(A_listener[-1, 0])
+        # append data to array
+        self.A_listener = np.append(self.A_listener, [[data_list[0], data_list[1], data_list[2], data_list[3],
+                                                       data_list[4], data_list[5], data_list[6], data_list[7]]],
+                                    axis=0)
 
+        self.start_time = time.time()
+        print self.A_listener.shape
 
-def return_array():
-    # deletes first row of array, because first row is only 1
-    return np.delete(A_listener, 0, 0)
+    def return_array(self):
+        # deletes first row of array, because first row is only 1
+        # return np.delete(A_listener, 0, 0)
+        return self.A_listener
 
+    def listener(self):
+        # In ROS, nodes are uniquely named. If two nodes with the same
+        # name are launched, the previous one is kicked off. The
+        # anonymous=True flag means that rospy will choose a unique
+        # name for our 'listener' node so that multiple listeners can
+        # run simultaneously.
+        rospy.init_node('listener', anonymous=True)
 
-def listener():
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+        # multiple options for Odometry msg type
+        # Odometry.pose.pose.position.x
+        # Odometry.pose.pose.position.y
+        # Odometry.header.stamp
+        # Odometry.header.seq
+        # Odometry.twist.twist.linear.x
+        # Odometry.twist.twist.linear.y
+        # Odometry.twist.twist.angular.z
+        rospy.Subscriber(self.topic, Odometry, self.callback)
+        while not rospy.is_shutdown():
+            # check if idle time is too long and then shutdown node
+            if time.time() - self.start_time >= 3:
+                rospy.signal_shutdown('idle time too long')
+            print 'Idle Time: %.2f' % (time.time() - self.start_time)
+            rospy.sleep(0.25)
 
-    global A_listener
-    # create array for further use
-    A_listener = np.ones([1, 8], dtype=np.double)
+            # spin() simply keeps python from exiting until this node is stopped
+            # rospy.spin()
 
-    # multiple options for Odometry msg type
-    # Odometry.pose.pose.position.x
-    # Odometry.pose.pose.position.y
-    # Odometry.header.stamp
-    # Odometry.header.seq
-    # Odometry.twist.twist.linear.x
-    # Odometry.twist.twist.linear.y
-    # Odometry.twist.twist.angular.z
-    rospy.Subscriber('/base/odometry_controller/odometry', Odometry, callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
-
-if __name__ == '__main__':
-    listener()
+    if __name__ == '__main__':
+        listener()
