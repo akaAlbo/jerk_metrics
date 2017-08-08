@@ -103,15 +103,15 @@ class NodeListener:
         # Odometry.twist.twist.linear.y
         # Odometry.twist.twist.angular.z
         rospy.Subscriber(self.topic, Odometry, self.callback)
-        while not rospy.is_shutdown():
-            # check if idle time is too long and then shutdown node
-            if time.time() - self.start_time >= 3:
-                rospy.signal_shutdown('idle time too long')
-            print 'Idle Time: %.2f' % (time.time() - self.start_time)
-            rospy.sleep(0.25)
+        # while not rospy.is_shutdown():
+        #     # check if idle time is too long and then shutdown node
+        #     if time.time() - self.start_time >= 3:
+        #         rospy.signal_shutdown('idle time too long')
+        #     print 'Idle Time: %.2f' % (time.time() - self.start_time)
+        #     rospy.sleep(0.25)
 
-            # spin() simply keeps python from exiting until this node is stopped
-            # rospy.spin()
+        # spin() simply keeps python from exiting until this node is stopped
+        rospy.spin()
 
     if __name__ == '__main__':
         listener()
