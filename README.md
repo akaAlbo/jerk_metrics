@@ -110,7 +110,7 @@ from atf_metrics.calculate_jerk import CalculateJerk, CalculateJerkParamHandler
 jerk:
   handler: CalculateJerkParamHandler
 ```
-- In file ```atf\_presenter\html\js\atf\_tools\test\_list.js``` add:
+- In file ```atf\_presenter\html\js\atf\_tools\test\_list.js``` add (using "jerk" as an example):
 ```javascript
 var plot_options = {
       jerk: {
