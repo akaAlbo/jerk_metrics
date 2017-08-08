@@ -83,7 +83,7 @@ calculate_*name*.py
 - copy existing structure from one of the implemented metrics, looking like:
 ```python
 class CalculatePublishRateParamHandler
-    def parse_parameter(self, testblock_name, params)	
+    def parse_parameter(self, testblock_name, params):
 class CalculatePublishRate:
     def __init__(self, groundtruth, groundtruth_epsilon):
     def start(self, timestamp):
