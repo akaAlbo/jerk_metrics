@@ -137,7 +137,7 @@ def show_figures():
     plot2Subplots(A[:, AD.FHS], A_grad_acc_smo[:, ],
                   A_grad_acc[:, ], '$a_{grad,smoothed}$', '$a_{grad,noisy}$',
                   'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
-                  'Acceleration', axSize=[0, 80, -.1, 1.0], show=1)
+                  'Acceleration', axSize=[0, 80, -.1, 1.0], show=0)
 
     # plot acceleration x,y separately
     plot2Subplots(A[:, AD.FHS], A_grad_acc_x, A_grad_acc_y, '$a_{grad,x}$', '$a_{grad,y}$',
@@ -148,7 +148,7 @@ def show_figures():
     plot2Subplots(A[:, AD.FHS], A_grad_smo_jerk[:, ],
                   A_grad_jerk[:, ], '$j_{grad,smoothed}$', '$j_{grad,noisy}$',
                   'Time [s]', '$\mathrm{j\;[m/s^3]}$', '$\mathrm{j\;[m/s^3]}$',
-                  'Jerk', axSize=[0, 80, -.5, 15], show=1)
+                  'Jerk', axSize=[0, 80, -.5, 15], show=0)
 
     # plot complete jerk smoothed
     plot1figure(A[:, AD.FHS], A_grad_smo_jerk,
@@ -493,7 +493,7 @@ def main():
     # smoothing_times_plot()
     # jerk_comparison()
     # smoothing_workflow_comparison()
-    # show_figures()
+    show_figures()
 
 
 # number counter for figures
