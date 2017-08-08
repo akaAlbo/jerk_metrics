@@ -48,6 +48,9 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.6.2:**
+- added minor improvements
+
 **V 1.6.1:**
 - bug fixing (time calculating bug because of nanoseconds in timestamp)
 
