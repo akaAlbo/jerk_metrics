@@ -11,7 +11,7 @@ Included subscriber to ROS-topic
 ```
 /base/odometry_controller/
 ```
-topic, of type 'nav_msgs.msg' as 'Odometry.msg'. 
+topic, of type ```nav_msgs.msg``` as ```Odometry.msg```. 
 Access data via:
 ```
 data.header.seq
