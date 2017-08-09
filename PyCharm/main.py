@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.6.2
+@version: 1.7.0
 """
 
 import csv
@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import listener
+import time
 
 
 # AD stands for ArrayData
@@ -46,6 +47,11 @@ class JerkEvaluation:
         self.n = 1
         # smoothing parameter value [30 is good value]
         self.smo_para = 30
+
+        # list for header-names from csv
+        self.data = []
+
+        # create array
         self.A = np.ones([0, 8], dtype=np.double)
 
         self.A_grad_vel = np.ones([0, 8], dtype=np.double)
@@ -323,7 +329,7 @@ class JerkEvaluation:
         pos_x = 'field.pose.pose.position.x'  # position x-axis
         pos_y = 'field.pose.pose.position.y'  # position y-axis
 
-        data = [time, hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
+        self.data = [time, hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
 
         with open('Ingolstadt_Test3.csv', 'rb') as csvfile:
             odometry_reader = csv.DictReader(csvfile, delimiter=',')
@@ -331,7 +337,7 @@ class JerkEvaluation:
             column_names_csv = odometry_reader.fieldnames
             # get number of rows in csv-file
             row_number = sum(1 for line in odometry_reader)
-            A = np.zeros([row_number, data.__len__()], dtype=np.double)
+            A = np.zeros([row_number, self.data.__len__()], dtype=np.double)
             # set pointer to first row
             csvfile.seek(0)
             # jump over first now with names
@@ -340,10 +346,10 @@ class JerkEvaluation:
             i = 0
             for row in odometry_reader:
                 # jump over header row with names
-                if row[data[0]] == time:
+                if row[self.data[0]] == time:
                     continue
                 j = 0
-                for name in data:
+                for name in self.data:
                     if name == time or name == fhs:
                         # scale time and field.header.stamp with factor 1e-9
                         scale = 10 ** -9
@@ -444,6 +450,13 @@ class JerkEvaluation:
         self.A_diff = np.diff(np.transpose(self.A))
         self.A_diff = np.transpose(self.A_diff)
 
+# REVIEW: save string above float: np.column_stack((NAMES, FLOATS))
+    def save_csv(self):
+        print time.strftime("%H:%M - %d.%m.%Y")
+        #FIXME: could not convert string to float... data is string
+        self.A = np.insert(self.A, 0, [self.data], axis=0)
+        np.savetxt(time.strftime("%H:%M - %d.%m.%Y")+'.csv', self.A, fmt='%.18e', delimiter=',')
+
     # creating bandwidth matrix
     def bandwidth(self, max):
         B = np.zeros([m_A, 1])
@@ -499,16 +512,18 @@ class JerkEvaluation:
     def main(self):
         # close all existing figures
         plt.close('all')
-        # self.read_data_csv()
-        self.read_data_subscriber()
+        self.read_data_csv()
+        # self.read_data_subscriber()
         self.differentiation()
+        self.save_csv()
         # smoothing_times_plot()
         # jerk_comparison()
         # smoothing_workflow_comparison()
         self.show_figures()
 
-    # commandline input: -jerk=*max_jerk*
-    # if no commandline input is given, max_jerk=4.0 is set
+
+# commandline input: -jerk=*max_jerk*
+# if no commandline input is given, max_jerk=4.0 is set
 if __name__ == '__main__':
     je = JerkEvaluation()
     je.main()
@@ -520,5 +535,5 @@ if __name__ == '__main__':
         je.jerk_metrics(4.0)
 pass
 
-# TODO: define good max jerk metrics value
+# TODO: save array A as .csv-file
 # REVIEW:
