@@ -499,8 +499,8 @@ class JerkEvaluation:
     def main(self):
         # close all existing figures
         plt.close('all')
-        self.read_data_csv()
-        # self.read_data_subscriber()
+        # self.read_data_csv()
+        self.read_data_subscriber()
         self.differentiation()
         # smoothing_times_plot()
         # jerk_comparison()
