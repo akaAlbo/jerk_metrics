@@ -46,28 +46,31 @@ from nav_msgs.msg import Odometry
 import numpy as np
 import time
 
-sentence = []
-sentence.append("Collecting data...")
-sentence.append("Waiting to finish...")
-sentence.append("Taking over the world...")
-sentence.append("Planting a tree...")
-sentence.append("Polluting the ocean...")
-sentence.append("Spinning up the hamster...")
-sentence.append("Shovelling coal into the server...")
-sentence.append("Programming the flux capacitor...")
-sentence.append("Hum something loud while others stare...")
-sentence.append("Take a moment to sign up for our lovely prizes...")
-sentence.append("Don\'t think of purple hippos...")
-sentence.append("Dig on the \'X\' for buried treasure... ARRR!")
-sentence.append("Do you suffer from ADHD? Me neith- oh look a bunny... What was I doing again? Oh, right. Here we go.")
-sentence.append("Testing data on Timmy... ... ... We\'re going to need another Timmy.")
-sentence.append("The last time I tried this the monkey didn't survive. Let's hope it works better this time.")
-sentence.append("Warming up Large Hadron Collider...")
-sentence.append("checking the gravitational constant in your locale...")
+# REVIEW: check if class 'Sentence' working
+class Sentence:
+    def __init__(self):
+        self.sentence = []
+        self.sentence.append("Collecting data...")
+        self.sentence.append("Waiting to finish...")
+        self.sentence.append("Taking over the world...")
+        self.sentence.append("Planting a tree...")
+        self.sentence.append("Polluting the ocean...")
+        self.sentence.append("Spinning up the hamster...")
+        self.sentence.append("Shovelling coal into the server...")
+        self.sentence.append("Programming the flux capacitor...")
+        self.sentence.append("Hum something loud while others stare...")
+        self.sentence.append("Take a moment to sign up for our lovely prizes...")
+        self.sentence.append("Don\'t think of purple hippos...")
+        self.sentence.append("Dig on the \'X\' for buried treasure... ARRR!")
+        self.sentence.append("Do you suffer from ADHD? Me neith- oh look a bunny... What was I doing again? Oh, right. Here we go.")
+        self.sentence.append("Testing data on Timmy... ... ... We\'re going to need another Timmy.")
+        self.sentence.append("The last time I tried this the monkey didn't survive. Let's hope it works better this time.")
+        self.sentence.append("Warming up Large Hadron Collider...")
+        self.sentence.append("checking the gravitational constant in your locale...")
 
 
-def spin():
-    return sentence[np.random.randint(0, len(sentence))]
+    def spin(self):
+        return self.sentence[np.random.randint(0, len(self.sentence))]
 
 
 class NodeListener:
@@ -103,7 +106,7 @@ class NodeListener:
 
         self.start_time = time.time()
         if self.A_listener.shape[0] in xrange(0, 100000, 25):
-            print str(self.A_listener.shape) + ' ' + spin()
+            print str(self.A_listener.shape) + ' ' + Sentence.spin()
 
     def return_array(self):
         # deletes first row of array, because first row is only 1
