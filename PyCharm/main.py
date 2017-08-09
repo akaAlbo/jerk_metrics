@@ -150,25 +150,25 @@ class JerkEvaluation:
     def show_figures(self):
         # plot position
         self.plot2Subplots(self.A[:, AD.FHS], self.A[:, AD.POS_X], self.A[:, AD.POS_Y],
-                           '$Pos_x$', '$Pos_y$', 'Time [s]', 'x [m]',
-                           'x [m]', 'Position', axSize='auto', show=0)
+                           '$\mathrm{Pos_x}$', '$\mathrm{Pos_y}$', 'Time [s]', '$\mathrm{x\;[m]}$',
+                           '$\mathrm{x\;[m]}$', 'Position', axSize='auto', show=0)
 
         # plot velocity odometry controller
         self.plot2Subplots(self.A[:, AD.FHS], self.A[:, AD.VEL_X], self.A[:, AD.VEL_Y],
-                           '$v_x$', '$v_y$', 'Time [s]', 'v [m/s]', 'v [m/s]',
+                           '$\mathrm{v_x}$', '$\mathrm{v_y}$', 'Time [s]', '$\mathrm{v\;[m/s]}$', '$\mathrm{v\;[m/s]}$',
                            title='Velocity', show=0)
 
         # plot velocity (x^2+y^2)^0.5 diff
         self.plot2Subplots(self.A[:-1, AD.FHS], np.sqrt(self.A_diff[:, AD.POS_X] ** 2 + self.A_diff[:, AD.POS_Y] ** 2),
                            np.sqrt(self.A[:-1, AD.VEL_X] ** 2 + self.A[:-1, AD.VEL_Y] ** 2),
-                           '$v_{x,diff,root}$', '$v_{x,odo,root}$', 'Time [s]', 'v [m/s]', 'v [m/s]',
-                           title='Velocity calculated using \'diff\'', show=0)
+                           '$\mathrm{v_{x,diff,root}}$', '$\mathrm{v_{x,odo,root}}$', 'Time [s]', '$\mathrm{v\;[m/s]}$',
+                           '$\mathrm{v\;[m/s]}$', title='Velocity calculated using \'diff\'', show=0)
 
         # plot velocity (x^2+y^2)^0.5 gradient
         self.plot2Subplots(self.A[:, AD.FHS], self.A_grad_vel[:, ],
                            np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
-                           '$v_{x,grad,root}$', '$v_x{x,odo,root}$', 'Time [s]',
-                           'v [m/s]', 'v [m/s]', title='Velocity calculated using \'gradient\'',
+                           '$\mathrm{v_{x,grad,root}}$', '$\mathrm{v_x{x,odo,root}}$', 'Time [s]',
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{v\;[m/s]}$', title='Velocity calculated using \'gradient\'',
                            axSize=[0, 73, -.05, .3], show=0)
 
         # plot acceleration diff: x,y
@@ -179,12 +179,12 @@ class JerkEvaluation:
         # plot diff and gradient method comparison for acceleration
         self.plot2Subplots(self.A[:-1, AD.FHS], self.A_grad_acc[:-1, ],
                            np.sqrt(self.A_diff[:, AD.VEL_X] ** 2 + self.A_diff[:, AD.VEL_Y] ** 2),
-                           '$a_{grad}$', '$a_{diff}$', 'Time [s]', '$\mathrm{a\;[m/s^2]}$',
+                           '$\mathrm{a_{grad}}$', '$\mathrm{a_{diff}}$', 'Time [s]', '$\mathrm{a\;[m/s^2]}$',
                            '$\mathrm{a\;[m/s^2]}$', 'Diff_Grad', axSize='auto', show=0)
 
         # plot acceleration smoothed and noisy signal
         self.plot2Subplots(self.A[:, AD.FHS], self.A_grad_acc_smo[:, ],
-                           self.A_grad_acc[:, ], '$a_{grad,smoothed}$', '$a_{grad,noisy}$',
+                           self.A_grad_acc[:, ], '$\mathrm{a_{grad,smoothed}}$', '$\mathrm{a_{grad,noisy}}$',
                            'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
                            'Acceleration', axSize=[0, 80, -.1, 1.0], show=0)
 
@@ -195,19 +195,19 @@ class JerkEvaluation:
 
         # plot jerk smoothed and noisy: 30 is good value for smoothing
         self.plot2Subplots(self.A[:, AD.FHS], self.A_grad_smo_jerk[:, ],
-                           self.A_grad_jerk[:, ], '$j_{grad,smoothed}$', '$j_{grad,noisy}$',
+                           self.A_grad_jerk[:, ], '$\mathrm{j_{grad,smooth}}$', '$\mathrm{j_{grad,noisy}}$',
                            'Time [s]', '$\mathrm{j\;[m/s^3]}$', '$\mathrm{j\;[m/s^3]}$',
                            'Jerk', axSize=[0, 80, -.5, 15], show=0)
 
         # plot complete jerk smoothed
         self.plot1figure(self.A[:, AD.FHS], self.A_grad_smo_jerk,
-                         '$j_{grad,smoothed,30}$', 'Time [s]', 'j $[m/s^3]$', 'Jerk Smoothed',
+                         '$\mathrm{j_{smooth,30}}$', 'Time [s]', '$\mathrm{j\;[m/s^3]}$', 'Jerk Smoothed',
                          axSize='auto', show=1)
 
         # plot velocity and jerk
         self.plot2Subplots(self.A[:, AD.FHS], np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
-                           self.A_grad_smo_jerk, '$v_{A}$', '$j_{grad,smooth,30}$', 'Time [s]',
-                           'v [m/s]', 'j $[m/s^3]$', 'Velocity and Jerk', show=1)
+                           self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
         plt.show()
 
@@ -216,9 +216,9 @@ class JerkEvaluation:
         plt.figure(self.n, figsize=(16.0, 10.0))
         plt.plot(self.A[:, AD.TIME], self.A[:, AD.VEL_X], 'r',
                  label='$v_{normal}$')
-        plt.plot(A[:, AD.TIME], self.smooth(self.A[:, AD.VEL_X], 30, window='hanning'),
+        plt.plot(self.A[:, AD.TIME], self.smooth(self.A[:, AD.VEL_X], 30, window='hanning'),
                  label='$v_{smooth,1\,times}$')
-        plt.plot(A[:, AD.TIME], self.smooth(
+        plt.plot(self.A[:, AD.TIME], self.smooth(
             self.smooth(self.A[:, AD.VEL_X], 10, window='hanning'),
             50, window='hamming'), label='$v_{smooth,2\,times}$')
         plt.grid(True)
@@ -235,13 +235,13 @@ class JerkEvaluation:
     def jerk_comparison(self):
         plt.figure(self.n, figsize=(16.0, 10.0))
         for i in [10, 20, 30, 40, 50]:
-            plt.plot(A[:, AD.TIME], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
+            plt.plot(self.A[:, AD.TIME], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
                      label='$j_{grad,smooth,' + str(i) + '}$')
             plt.xlabel('Time [s]', fontsize=20)
             plt.ylabel('j $[m/s^3]$', fontsize=20)
             plt.grid(True)
 
-        plt.plot(A[:, AD.TIME], self.bandwidth(4.5), 'k--', label='$Bandwidth$')
+        plt.plot(self.A[:, AD.TIME], self.bandwidth(4.5), 'k--', label='$Bandwidth$')
         plt.title('Jerk comparison different smoothing', fontsize=20)
         plt.legend(fontsize=15)
         plt.axis([18, 23, -.5, 7])
@@ -309,7 +309,7 @@ class JerkEvaluation:
 
     # read data from .csv-file
     def read_data_csv(self):
-        global A
+        # global A
         global m_A
         global n_A
 
@@ -363,6 +363,7 @@ class JerkEvaluation:
 
         print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
         print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.FHS] - A[0, AD.FHS])
+        self.A = A
 
     def read_data_subscriber(self):
         # global A
@@ -461,9 +462,9 @@ class JerkEvaluation:
             if self.A_grad_smo_jerk[i,] >= max_jerk:
                 output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
                                         'allowed jerk: {:.3f} [m/s^3]' + bcolors.ENDC
-                print output.format(self.A_grad_smo_jerk[i,], A[i, AD.FHS], max_jerk)
+                print output.format(self.A_grad_smo_jerk[i,], self.A[i, AD.FHS], max_jerk)
                 print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} s is in ' \
-                      'range'.format(self.A_grad_smo_jerk[i - 1,], A[i - 1, AD.FHS])
+                      'range'.format(self.A_grad_smo_jerk[i - 1,], self.A[i - 1, AD.FHS])
                 print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
                 return False
         print bcolors.OKGREEN + 'Jerk is in desired range!' + bcolors.ENDC
@@ -474,17 +475,17 @@ class JerkEvaluation:
     def smoothing_workflow_comparison(self):
         plt.figure(self.n, figsize=(16.0, 10.0))
         plt.subplot(211)
-        plt.plot(A[:, AD.TIME], self.A_grad_acc, 'b', label='unsmoothed')
-        plt.plot(A[:, AD.TIME], self.A_grad_acc_smo, 'k', label='smoothed after differentiation')
-        plt.plot(A[:, AD.TIME], self.A_grad_smo_acc, 'r', label='smoothed acc x and y used')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_acc, 'b', label='unsmoothed')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_acc_smo, 'k', label='smoothed after differentiation')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_smo_acc, 'r', label='smoothed acc x and y used')
         plt.ylabel('a $[m/s^2]$', fontsize=20)
         plt.legend()
         plt.grid(True)
 
         plt.subplot(212)
-        plt.plot(A[:, AD.TIME], self.A_grad_jerk, 'b', label='unsmoothed')
-        plt.plot(A[:, AD.TIME], self.A_grad_jerk_smo, 'k', label='smoothed after differentiation')
-        plt.plot(A[:, AD.TIME], self.A_grad_smo_jerk, 'r', label='smoothed acc used for differentiation')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_jerk, 'b', label='unsmoothed')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_jerk_smo, 'k', label='smoothed after differentiation')
+        plt.plot(self.A[:, AD.TIME], self.A_grad_smo_jerk, 'r', label='smoothed acc used for differentiation')
         plt.ylabel('j $[m/s^3]$', fontsize=20)
         plt.grid(True)
 
@@ -498,8 +499,8 @@ class JerkEvaluation:
     def main(self):
         # close all existing figures
         plt.close('all')
-        # read_data_csv()
-        self.read_data_subscriber()
+        self.read_data_csv()
+        # self.read_data_subscriber()
         self.differentiation()
         # smoothing_times_plot()
         # jerk_comparison()
