@@ -59,6 +59,13 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.7.1:**
+- new python file including colors for terminal output named `bcolors.py`
+- `from bcolors import TerminalColors as tc` --> `tc.OKBLUE` shows blue ouptut
+- added information on how to kill the `listener.py`-subscriber on function call
+- changed timeformat from `%d.%m.%Y---%H:%M` to `%d_%m_%Y---%H:%M` for better implementation in Latex (dot is not supported in pdf-names)
+- changed structure in chapter "HOW TO New Metric"
+
 **V 1.7.0:**
 - added function to store collected data in .csv-file
 - save .csv-file with name convention: ```%d.%m.%Y---%H:%M```
