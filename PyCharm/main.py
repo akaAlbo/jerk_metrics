@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.7.0
+@version: 1.7.1
 """
 
 import csv
@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import sys
 import listener
 import time
+from bcolors import TerminalColors as tc
 
 
 # AD stands for ArrayData
@@ -29,18 +30,7 @@ class AD(enumerate):
     POS_Y = 7  # position y-axis
 
 
-# colours in terminal prints
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
+# class for evaluating the jerk metrics
 class JerkEvaluation:
     def __init__(self):
         # number counter for figures
@@ -48,6 +38,7 @@ class JerkEvaluation:
         # smoothing parameter value [30 is good value]
         self.smo_para = 30
 
+        self.timeformat = "%d_%m_%Y---%H:%M"
         # save header names for further use
         self.time = '%time'
         self.hs = 'field.header.seq'
@@ -107,7 +98,7 @@ class JerkEvaluation:
                 plt.axis(axSize)
 
             plt.legend(fontsize=15)
-            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                         bbox_inches='tight')
 
             # increment figure number counter
@@ -155,7 +146,7 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                         bbox_inches='tight')
 
             # increment figure number counter
@@ -219,12 +210,12 @@ class JerkEvaluation:
         # plot complete jerk smoothed
         self.plot1figure(self.A[:, AD.FHS], self.A_grad_smo_jerk,
                          '$\mathrm{j_{smooth,30}}$', 'Time [s]', '$\mathrm{j\;[m/s^3]}$', 'Jerk Smoothed',
-                         axSize='auto', show=1)
+                         axSize='auto', show=0)
 
         # plot velocity and jerk
         self.plot2Subplots(self.A[:, AD.FHS], np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
-                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=0)
 
         plt.show()
 
@@ -380,7 +371,9 @@ class JerkEvaluation:
         # subscribe to odometry
         nl.listener()
         self.A = np.array(nl.return_array())
-        print bcolors.OKBLUE + 'Got this array: ', self.A.shape, bcolors.ENDC
+        print tc.OKBLUE + '=========================' + tc.ENDC
+        print tc.OKBLUE + 'Got this array: ', self.A.shape, tc.ENDC
+        print tc.OKBLUE + '=========================' + tc.ENDC
 
         # set time to start at 0s
         self.A[:, AD.FHS] = self.A[:, AD.FHS] - self.A[0, AD.FHS]
@@ -388,6 +381,8 @@ class JerkEvaluation:
         m_A, n_A = self.A.shape
 
         print 'Time of Interval: {:.4f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
+        # save collected data as .csv-file
+        self.save_csv()
 
     # get differentiation from given data
     def differentiation(self):
@@ -454,7 +449,7 @@ class JerkEvaluation:
         data_matrix = np.array([[self.data[i] for i in xrange(0, self.data.__len__())]])
         B = np.concatenate((data_matrix, self.A), axis=0)
         # fmt='%.18e' for float
-        np.savetxt('csv/' + time.strftime("%d.%m.%Y---%H:%M") + '.csv', B, fmt='%s', delimiter=',')
+        np.savetxt('csv/' + time.strftime(self.timeformat) + '.csv', B, fmt='%s', delimiter=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
@@ -468,19 +463,23 @@ class JerkEvaluation:
         '''
         jerk metrics to see if max jerk is in desired range
         :param max_jerk: max allowed jerk for comparison
-        :return: false --
+        :return: false - jerk is above max allowed jerk
+        :return: true - jerk is below max allowed jerk
         '''
         for i in xrange(0, m_A):
             if self.A_grad_smo_jerk[i,] >= max_jerk:
-                output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
-                                        'allowed jerk: {:.3f} [m/s^3]' + bcolors.ENDC
+                output = tc.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} [s] is bigger than max allowed jerk: {:.3f} [m/s^3]' + tc.ENDC
+                print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
                 print output.format(self.A_grad_smo_jerk[i,], self.A[i, AD.FHS], max_jerk)
-                print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} s is in ' \
-                      'range'.format(self.A_grad_smo_jerk[i - 1,], self.A[i - 1, AD.FHS])
+                print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} [s] is in range'.format(self.A_grad_smo_jerk[i - 1,],
+                                                                                          self.A[i - 1, AD.FHS])
                 print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
+                print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
                 return False
-        print bcolors.OKGREEN + 'Jerk is in desired range!' + bcolors.ENDC
+        print tc.OKGREEN + '=' * 25 + tc.ENDC
+        print tc.OKGREEN + 'Jerk is in desired range!' + tc.ENDC
         print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
+        print tc.OKGREEN + '=' * 25 + tc.ENDC
         return True
 
     # smoothing in workflow comparison
@@ -511,10 +510,10 @@ class JerkEvaluation:
     def main(self):
         # close all existing figures
         plt.close('all')
-        self.read_data_csv()
-        # self.read_data_subscriber()
+        # self.read_data_csv()
+        self.read_data_subscriber()
         self.differentiation()
-        self.save_csv()
+        # self.save_csv()
         # smoothing_times_plot()
         # jerk_comparison()
         # smoothing_workflow_comparison()
