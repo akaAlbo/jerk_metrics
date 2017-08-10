@@ -1,17 +1,19 @@
 # Jerk Metrics
-Writing a python programm to get the "/base/odometry_controller"-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
+Writing a python programm to get the `/base/odometry_controller`-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
 
 ## Usage
 ### Plots
-All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "Plots", named according to plotted data. See example:
+All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "/Plots" (which has to be created
+manually), named according to plotted data including timestamp. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
+
 
 ### ROS Subscriber Support
 Included subscriber to ROS-topic 
 ```
 /base/odometry_controller/
 ```
-topic, of type 'nav_msgs.msg' as 'Odometry.msg'. 
+topic, of type `nav_msgs.msg` as `Odometry.msg`. 
 Access data via:
 ```
 data.header.seq
@@ -22,11 +24,20 @@ data.twist.twist.angular.z
 data.pose.pose.position.x
 data.pose.pose.position.y
 ```
-"stamp" data is given in seconds and nanoseconds. Listener is wizard and calculates one time value.
+`stamp` data is given in seconds and nanoseconds. Listener is wizard and calculates one time value.
 ```
 data.header.stamp.secs
 data.header.stamp.nsecs
 ```
+**Attention**:
+precision of header.stamp: 3.3f (`nsecs` doesn't provide more than milliseconds precision.
+Example: `sec: 121 [s]` | `nsecs: 702000000 [ns]` --> `121.702000000 [s]`
+
+Precision should be sufficient for differentiation, but nanoseconds are not really supported.
+
+### .csv-Files
+The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder "/csv" (which has to be created
+manually). 
 
 ### Terminal
 Command-line support for max allowed jerk value given to metrics. Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
