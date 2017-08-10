@@ -43,6 +43,7 @@ from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 import numpy as np
 import time
+from bcolors import TerminalColors as tc
 
 
 class Sentence:
@@ -122,6 +123,11 @@ class NodeListener:
         # name for our 'listener' node so that multiple listeners can
         # run simultaneously.
         rospy.init_node('listener', anonymous=True)
+
+        print tc.OKBLUE + '=' * 98 + tc.ENDC
+        print tc.OKBLUE + 'Use keyboard interrupt to kill \'listener.py\' after collecting sufficient data ' \
+                          'to start evaluating!' + tc.ENDC
+        print tc.OKBLUE + '=' * 98 + tc.ENDC
 
         # multiple options for Odometry msg type
         # Odometry.pose.pose.position.x
