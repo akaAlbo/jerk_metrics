@@ -107,7 +107,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
 
             plt.legend(fontsize=15)
-            plt.savefig(title + '.pdf', bbox_inches='tight')
+            plt.savefig('Plots/' + title.lower() + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+                        bbox_inches='tight')
 
             # increment figure number counter
             self.n += 1
@@ -154,7 +155,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.savefig(title + '.pdf', bbox_inches='tight')
+            plt.savefig('Plots/' + title.lower() + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+                        bbox_inches='tight')
 
             # increment figure number counter
             self.n += 1
@@ -217,12 +219,12 @@ class JerkEvaluation:
         # plot complete jerk smoothed
         self.plot1figure(self.A[:, AD.FHS], self.A_grad_smo_jerk,
                          '$\mathrm{j_{smooth,30}}$', 'Time [s]', '$\mathrm{j\;[m/s^3]}$', 'Jerk Smoothed',
-                         axSize='auto', show=0)
+                         axSize='auto', show=1)
 
         # plot velocity and jerk
         self.plot2Subplots(self.A[:, AD.FHS], np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
-                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=0)
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
         plt.show()
 
@@ -385,7 +387,7 @@ class JerkEvaluation:
         # save dimensions of A
         m_A, n_A = self.A.shape
 
-        print 'Time of Interval: {:.3f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
+        print 'Time of Interval: {:.4f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
 
     # get differentiation from given data
     def differentiation(self):
@@ -452,7 +454,7 @@ class JerkEvaluation:
         data_matrix = np.array([[self.data[i] for i in xrange(0, self.data.__len__())]])
         B = np.concatenate((data_matrix, self.A), axis=0)
         # fmt='%.18e' for float
-        np.savetxt(time.strftime("%d.%m.%Y---%H:%M") + '.csv', B, fmt='%s', delimiter=',')
+        np.savetxt('csv/' + time.strftime("%d.%m.%Y---%H:%M") + '.csv', B, fmt='%s', delimiter=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
