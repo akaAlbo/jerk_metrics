@@ -37,14 +37,40 @@
 #
 # Revision $Id$
 
-## Simple talker demo that listens to std_msgs/Strings published
-## to the 'chatter' topic
 
 import rospy
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 import numpy as np
 import time
+from bcolors import TerminalColors as tc
+
+
+class Sentence:
+    def __init__(self):
+        self.sentence = []
+        self.sentence.append("Collecting data...")
+        self.sentence.append("Waiting to finish...")
+        self.sentence.append("Taking over the world...")
+        self.sentence.append("Planting a tree...")
+        self.sentence.append("Polluting the ocean...")
+        self.sentence.append("Spinning up the hamster...")
+        self.sentence.append("Shovelling coal into the server...")
+        self.sentence.append("Programming the flux capacitor...")
+        self.sentence.append("Hum something loud while others stare...")
+        self.sentence.append("Take a moment to sign up for our lovely prizes...")
+        self.sentence.append("Don\'t think of purple hippos...")
+        self.sentence.append("Dig on the \'X\' for buried treasure... ARRR!")
+        self.sentence.append(
+            "Do you suffer from ADHD? Me neith- oh look a bunny... What was I doing again? Oh, right. Here we go.")
+        self.sentence.append("Testing data on Timmy... ... ... We\'re going to need another Timmy.")
+        self.sentence.append(
+            "The last time I tried this the monkey didn't survive. Let's hope it works better this time.")
+        self.sentence.append("Warming up Large Hadron Collider...")
+        self.sentence.append("checking the gravitational constant in your locale...")
+
+    def spin(self):
+        return self.sentence[np.random.randint(0, len(self.sentence))]
 
 
 class NodeListener:
@@ -53,7 +79,8 @@ class NodeListener:
         self.start_time = time.time()
         self.stop_time = None
         # create array for further use
-        self.A_listener = np.ones([0, 8], dtype=np.double)
+        self.A_listener = np.ones([0, 8], dtype=np.float64)
+        self.s = Sentence()
 
     def callback(self, data):
         # global data_list
@@ -66,6 +93,8 @@ class NodeListener:
         # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
         data_list = [-1,  # no %time in odometry message
                      float(data.header.seq),
+                     # precision of header.stamp: 3.3f (nsecs doesn't provide more than milliseconds
+                     # example: sec: 121 [s], nsecs: 702000000 [ns] --> 121.702 [s]
                      (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
                      float(data.twist.twist.linear.x),
                      float(data.twist.twist.linear.y),
@@ -79,7 +108,8 @@ class NodeListener:
                                     axis=0)
 
         self.start_time = time.time()
-        print self.A_listener.shape
+        if self.A_listener.shape[0] in xrange(0, 100000, 25):
+            print str(self.A_listener.shape) + ' ' + self.s.spin()
 
     def return_array(self):
         # deletes first row of array, because first row is only 1
@@ -93,6 +123,11 @@ class NodeListener:
         # name for our 'listener' node so that multiple listeners can
         # run simultaneously.
         rospy.init_node('listener', anonymous=True)
+
+        print tc.OKBLUE + '=' * 98 + tc.ENDC
+        print tc.OKBLUE + 'Use keyboard interrupt to kill \'listener.py\' after collecting sufficient data ' \
+                          'to start evaluating!' + tc.ENDC
+        print tc.OKBLUE + '=' * 98 + tc.ENDC
 
         # multiple options for Odometry msg type
         # Odometry.pose.pose.position.x

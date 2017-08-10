@@ -1,17 +1,20 @@
 # Jerk Metrics
-Writing a python programm to get the "/base/odometry_controller"-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
+Writing a python programm to get the `/base/odometry_controller`-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
 
 ## Usage
 ### Plots
-All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "Plots", named according to plotted data. See example:
+All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "/Plots" (which has to be created
+manually), named according to plotted data including timestamp. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
+
 
 ### ROS Subscriber Support
 Included subscriber to ROS-topic 
 ```
 /base/odometry_controller/
 ```
-topic, of type ```nav_msgs.msg``` as ```Odometry.msg```. 
+
+topic, of type `nav_msgs.msg` as `Odometry.msg`.
 Access data via:
 ```
 data.header.seq
@@ -22,11 +25,20 @@ data.twist.twist.angular.z
 data.pose.pose.position.x
 data.pose.pose.position.y
 ```
-"stamp" data is given in seconds and nanoseconds. Listener is wizard and calculates one time value.
+`stamp` data is given in seconds and nanoseconds. Listener is wizard and calculates one time value.
 ```
 data.header.stamp.secs
 data.header.stamp.nsecs
 ```
+**Attention**:
+precision of header.stamp: 3.3f (`nsecs` doesn't provide more than milliseconds precision.
+Example: `sec: 121 [s]` | `nsecs: 702000000 [ns]` --> `121.702000000 [s]`
+
+Precision should be sufficient for differentiation, but nanoseconds are not really supported.
+
+### .csv-Files
+The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder "/csv" (which has to be created
+manually). 
 
 ### Terminal
 Command-line support for max allowed jerk value given to metrics. Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
@@ -48,6 +60,27 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.7.1:**
+- new python file including colors for terminal output named `bcolors.py`
+- `from bcolors import TerminalColors as tc` --> `tc.OKBLUE` shows blue ouptut
+- added information on how to kill the `listener.py`-subscriber on function call
+- changed timeformat from `%d.%m.%Y---%H:%M` to `%d_%m_%Y---%H:%M` for better implementation in Latex (dot is not supported in pdf-names)
+- changed structure in chapter "HOW TO New Metric"
+
+**V 1.7.0:**
+- added function to store collected data in .csv-file
+- save .csv-file with name convention: ```%d.%m.%Y---%H:%M```
+  - %d: day
+  - %m: month
+  - %Y: full year
+  - %H: hour
+  - %M: minute
+- minor improvements in class compatibility
+- changed array datatype from ```dtype=np.double``` to ```dtype=np.float64```
+- `listener.py`-callback now only shows every 25 newly collected rows a console output
+  - sentence output added to kill waiting time
+
+
 **V 1.6.2:**
 - added minor improvements
 
@@ -76,6 +109,7 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 
 # HOW-TO New Metric
 The following steps are needed to implement a new metrics in ATF:
+### Python File
 - Create new python-file for the metrics, using the following nameconvention:
 ```
 calculate_*name*.py
@@ -113,6 +147,7 @@ from atf_metrics.calculate_jerk import CalculateJerk, CalculateJerkParamHandler
 jerk:
   handler: CalculateJerkParamHandler
 ```
+### ATF Presenter
 - In file ```atf\_presenter\html\js\atf\_tools\test\_list.js``` add (using "jerk" as an example):
 ```javascript
 var plot_options = {
@@ -155,4 +190,4 @@ if (metric_name == 'jerk') chart_legend_name = testblock_name + "<br>(" + metric
 ```javascript
 if (metric_name == '*name*') chart_legend_name = testblock_name + "<br>(" + metric_data['details'] + ")"
 ```
-  to get add information under the metrics-name in the presenter. The "details" you store in the "metrics\_data" will be shown under the metrics-name in brackets.
+To get additional information in the presenter. The "details" you store in the "metrics\_data" will be shown below the metrics-name in brackets.
