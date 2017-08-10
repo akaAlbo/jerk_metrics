@@ -37,8 +37,6 @@
 #
 # Revision $Id$
 
-## Simple talker demo that listens to std_msgs/Strings published
-## to the 'chatter' topic
 
 import rospy
 from std_msgs.msg import String
@@ -46,7 +44,6 @@ from nav_msgs.msg import Odometry
 import numpy as np
 import time
 
-# REVIEW: check if class 'Sentence' working
 class Sentence:
     def __init__(self):
         self.sentence = []
@@ -79,7 +76,8 @@ class NodeListener:
         self.start_time = time.time()
         self.stop_time = None
         # create array for further use
-        self.A_listener = np.ones([0, 8], dtype=np.double)
+        self.A_listener = np.ones([0, 8], dtype=np.float64)
+        self.s = Sentence()
 
     def callback(self, data):
         # global data_list
@@ -106,7 +104,7 @@ class NodeListener:
 
         self.start_time = time.time()
         if self.A_listener.shape[0] in xrange(0, 100000, 25):
-            print str(self.A_listener.shape) + ' ' + Sentence.spin()
+            print str(self.A_listener.shape) + ' ' + self.s.spin()
 
     def return_array(self):
         # deletes first row of array, because first row is only 1
