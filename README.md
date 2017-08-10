@@ -48,6 +48,20 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.7.0:**
+- added function to store collected data in .csv-file
+- save .csv-file with name convention: ```%d.%m.%Y---%H:%M```
+  - %d: day
+  - %m: month
+  - %Y: full year
+  - %H: hour
+  - %M: minute
+- minor improvements in class compatibility
+- changed array datatype from ```dtype=np.double``` to ```dtype=np.float64```
+- `listener.py`-callback now only shows every 25 newly collected rows a console output
+  - sentence output added to kill waiting time
+
+
 **V 1.6.2:**
 - added minor improvements
 
