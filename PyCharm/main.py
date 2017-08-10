@@ -48,28 +48,37 @@ class JerkEvaluation:
         # smoothing parameter value [30 is good value]
         self.smo_para = 30
 
+        # save header names for further use
+        self.time = '%time'
+        self.hs = 'field.header.seq'
+        self.fhs = 'field.header.stamp'  # stamp for calculating differentiation
+        self.vel_x = 'field.twist.twist.linear.x'  # velocity x-direction
+        self.vel_y = 'field.twist.twist.linear.y'  # velocity y-direction
+        self.ome_z = 'field.twist.twist.angular.z'  # omega around z-axis
+        self.pos_x = 'field.pose.pose.position.x'  # position x-axis
+        self.pos_y = 'field.pose.pose.position.y'  # position y-axis
         # list for header-names from csv
-        self.data = []
+        self.data = [self.time, self.hs, self.fhs, self.vel_x, self.vel_y, self.ome_z, self.pos_x, self.pos_y]
 
         # create array
-        self.A = np.ones([0, 8], dtype=np.double)
+        self.A = np.ones([0, 8], dtype=np.float64)
 
-        self.A_grad_vel = np.ones([0, 8], dtype=np.double)
-        self.A_grad_vel_x = np.ones([0, 8], dtype=np.double)
-        self.A_grad_vel_y = np.ones([0, 8], dtype=np.double)
-        self.A_grad_vel_smo = np.ones([0, 8], dtype=np.double)
+        self.A_grad_vel = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_vel_x = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_vel_y = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_vel_smo = np.ones([0, 8], dtype=np.float64)
 
-        self.A_grad_acc = np.ones([0, 8], dtype=np.double)
-        self.A_grad_acc_x = np.ones([0, 8], dtype=np.double)
-        self.A_grad_acc_y = np.ones([0, 8], dtype=np.double)
-        self.A_grad_acc_smo = np.ones([0, 8], dtype=np.double)
-        self.A_grad_smo_acc = np.ones([0, 8], dtype=np.double)
+        self.A_grad_acc = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_acc_x = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_acc_y = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_acc_smo = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_smo_acc = np.ones([0, 8], dtype=np.float64)
 
-        self.A_grad_jerk = np.ones([0, 8], dtype=np.double)
-        self.A_grad_jerk_x = np.ones([0, 8], dtype=np.double)
-        self.A_grad_jerk_y = np.ones([0, 8], dtype=np.double)
-        self.A_grad_jerk_smo = np.ones([0, 8], dtype=np.double)
-        self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.double)
+        self.A_grad_jerk = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_jerk_x = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_jerk_y = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_jerk_smo = np.ones([0, 8], dtype=np.float64)
+        self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.float64)
 
         self.A_diff = np.ones([0, 8], dtype=np.double)
 
@@ -208,12 +217,12 @@ class JerkEvaluation:
         # plot complete jerk smoothed
         self.plot1figure(self.A[:, AD.FHS], self.A_grad_smo_jerk,
                          '$\mathrm{j_{smooth,30}}$', 'Time [s]', '$\mathrm{j\;[m/s^3]}$', 'Jerk Smoothed',
-                         axSize='auto', show=1)
+                         axSize='auto', show=0)
 
         # plot velocity and jerk
         self.plot2Subplots(self.A[:, AD.FHS], np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
-                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=0)
 
         plt.show()
 
@@ -319,25 +328,13 @@ class JerkEvaluation:
         global m_A
         global n_A
 
-        # save header names for further use
-        time = '%time'
-        hs = 'field.header.seq'
-        fhs = 'field.header.stamp'  # stamp for calculating differentiation
-        vel_x = 'field.twist.twist.linear.x'  # velocity x-direction
-        vel_y = 'field.twist.twist.linear.y'  # velocity y-direction
-        ome_z = 'field.twist.twist.angular.z'  # omega around z-axis
-        pos_x = 'field.pose.pose.position.x'  # position x-axis
-        pos_y = 'field.pose.pose.position.y'  # position y-axis
-
-        self.data = [time, hs, fhs, vel_x, vel_y, ome_z, pos_x, pos_y]
-
         with open('Ingolstadt_Test3.csv', 'rb') as csvfile:
             odometry_reader = csv.DictReader(csvfile, delimiter=',')
             # column_names_csv is of type 'list'
             column_names_csv = odometry_reader.fieldnames
             # get number of rows in csv-file
             row_number = sum(1 for line in odometry_reader)
-            A = np.zeros([row_number, self.data.__len__()], dtype=np.double)
+            A = np.zeros([row_number, self.data.__len__()], dtype=np.float64)
             # set pointer to first row
             csvfile.seek(0)
             # jump over first now with names
@@ -346,11 +343,11 @@ class JerkEvaluation:
             i = 0
             for row in odometry_reader:
                 # jump over header row with names
-                if row[self.data[0]] == time:
+                if row[self.data[0]] == self.time:
                     continue
                 j = 0
                 for name in self.data:
-                    if name == time or name == fhs:
+                    if name == self.time or name == self.fhs:
                         # scale time and field.header.stamp with factor 1e-9
                         scale = 10 ** -9
                     else:
@@ -450,12 +447,12 @@ class JerkEvaluation:
         self.A_diff = np.diff(np.transpose(self.A))
         self.A_diff = np.transpose(self.A_diff)
 
-# REVIEW: save string above float: np.column_stack((NAMES, FLOATS))
     def save_csv(self):
-        print time.strftime("%H:%M - %d.%m.%Y")
-        #FIXME: could not convert string to float... data is string
-        self.A = np.insert(self.A, 0, [self.data], axis=0)
-        np.savetxt(time.strftime("%H:%M - %d.%m.%Y")+'.csv', self.A, fmt='%.18e', delimiter=',')
+        print 'Date: ' + time.strftime("%d.%m.%Y-%H:%M")
+        data_matrix = np.array([[self.data[i] for i in xrange(0, self.data.__len__())]])
+        B = np.concatenate((data_matrix, self.A), axis=0)
+        # fmt='%.18e' for float
+        np.savetxt(time.strftime("%d.%m.%Y---%H:%M") + '.csv', B, fmt='%s', delimiter=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
@@ -535,5 +532,5 @@ if __name__ == '__main__':
         je.jerk_metrics(4.0)
 pass
 
-# TODO: save array A as .csv-file
+# TODO:
 # REVIEW:
