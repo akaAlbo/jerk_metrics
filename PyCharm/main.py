@@ -107,7 +107,7 @@ class JerkEvaluation:
                 plt.axis(axSize)
 
             plt.legend(fontsize=15)
-            plt.savefig('Plots/' + title.lower() + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
                         bbox_inches='tight')
 
             # increment figure number counter
@@ -155,7 +155,7 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.savefig('Plots/' + title.lower() + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
+            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime("%d.%m.%Y---%H:%M") + '.pdf',
                         bbox_inches='tight')
 
             # increment figure number counter
@@ -168,7 +168,7 @@ class JerkEvaluation:
         # plot position
         self.plot2Subplots(self.A[:, AD.FHS], self.A[:, AD.POS_X], self.A[:, AD.POS_Y],
                            '$\mathrm{Pos_x}$', '$\mathrm{Pos_y}$', 'Time [s]', '$\mathrm{x\;[m]}$',
-                           '$\mathrm{x\;[m]}$', 'Position', axSize='auto', show=0)
+                           '$\mathrm{y\;[m]}$', 'Position', axSize='auto', show=0)
 
         # plot velocity odometry controller
         self.plot2Subplots(self.A[:, AD.FHS], self.A[:, AD.VEL_X], self.A[:, AD.VEL_Y],
@@ -190,7 +190,7 @@ class JerkEvaluation:
 
         # plot acceleration diff: x,y
         self.plot2Subplots(self.A[:-1, AD.FHS], self.A_diff[:, AD.VEL_X], self.A_diff[:, AD.VEL_Y],
-                           '$a_x$', '$a_y$', 'Time [s]', '$\mathrm{a\quad[m/s^2]}$', '$\mathrm{a\quad[m/s^2]}$',
+                           '$a_x$', '$a_y$', 'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
                            'Acceleration', axSize='auto', show=0)
 
         # plot diff and gradient method comparison for acceleration
