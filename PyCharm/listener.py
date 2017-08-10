@@ -44,6 +44,7 @@ from nav_msgs.msg import Odometry
 import numpy as np
 import time
 
+
 class Sentence:
     def __init__(self):
         self.sentence = []
@@ -59,12 +60,13 @@ class Sentence:
         self.sentence.append("Take a moment to sign up for our lovely prizes...")
         self.sentence.append("Don\'t think of purple hippos...")
         self.sentence.append("Dig on the \'X\' for buried treasure... ARRR!")
-        self.sentence.append("Do you suffer from ADHD? Me neith- oh look a bunny... What was I doing again? Oh, right. Here we go.")
+        self.sentence.append(
+            "Do you suffer from ADHD? Me neith- oh look a bunny... What was I doing again? Oh, right. Here we go.")
         self.sentence.append("Testing data on Timmy... ... ... We\'re going to need another Timmy.")
-        self.sentence.append("The last time I tried this the monkey didn't survive. Let's hope it works better this time.")
+        self.sentence.append(
+            "The last time I tried this the monkey didn't survive. Let's hope it works better this time.")
         self.sentence.append("Warming up Large Hadron Collider...")
         self.sentence.append("checking the gravitational constant in your locale...")
-
 
     def spin(self):
         return self.sentence[np.random.randint(0, len(self.sentence))]
@@ -90,6 +92,8 @@ class NodeListener:
         # rospy.loginfo(rospy.get_caller_id() + 'twist angular z:  %s', data.twist.twist.angular.z)
         data_list = [-1,  # no %time in odometry message
                      float(data.header.seq),
+                     # precision of header.stamp: 3.3f (nsecs doesn't provide more than milliseconds
+                     # example: sec: 121 [s], nsecs: 702000000 [ns] --> 121.702 [s]
                      (float(data.header.stamp.secs) * 10 ** 9 + float(data.header.stamp.nsecs)) * 10 ** -9,
                      float(data.twist.twist.linear.x),
                      float(data.twist.twist.linear.y),
