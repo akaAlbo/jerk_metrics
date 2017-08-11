@@ -69,9 +69,8 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 
 ## History
 **V 1.7.2:**
-- better terminal support [link]
+- better terminal support [Terminal](https://github.com/ipa-flg-ma/jerk_metrics/tree/master#terminal)
 - `topic` in `listener.py` can now be changed, default: `/base/odometry_controller/odometry`
-- 
 
 **V 1.7.1:**
 - new python file including colors for terminal output named `bcolors.py`
