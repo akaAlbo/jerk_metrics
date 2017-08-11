@@ -44,7 +44,7 @@ manually).
 The follwing commandline arguments can be passed to `main.py`:
 
 | Short | Long | Value | Description |
-|:-----:|:----:|:-----:|:-----------:|
+|:-----:|:-------:|:-----:|:-----------:|
 | -h | --help | [FLAG] |show this help message and exit |
 | -j JERK | --jerk JERK | JERK [int] | max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
 | -s | --show_figures | [FLAG] | show generated plots |
