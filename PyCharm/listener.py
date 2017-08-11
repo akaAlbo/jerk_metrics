@@ -74,8 +74,8 @@ class Sentence:
 
 
 class NodeListener:
-    def __init__(self):
-        self.topic = '/base/odometry_controller/odometry'
+    def __init__(self, topic='/base/odometry_controller/odometry'):
+        self.topic = topic
         self.start_time = time.time()
         self.stop_time = None
         # create array for further use

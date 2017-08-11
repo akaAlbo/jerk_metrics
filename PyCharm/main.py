@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.7.1
+@version: 1.7.2
 """
 
 import csv
@@ -16,6 +16,7 @@ import sys
 import listener
 import time
 from bcolors import TerminalColors as tc
+import argparse
 
 
 # AD stands for ArrayData
@@ -72,6 +73,21 @@ class JerkEvaluation:
         self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.float64)
 
         self.A_diff = np.ones([0, 8], dtype=np.double)
+
+        parser = argparse.ArgumentParser(
+            description='Calculate jerk from a given topic publishing velocity. Standard: subscribe to topic \'/base/odometry_controller/odometry\'')
+        # group = parser.add_mutually_exclusive_group()
+        parser.add_argument('-j', '--jerk', help='max allowed jerk for jerk metrics, default = 4.0 [m/s^3]', type=float)
+        parser.add_argument('-s', '--show_figures', action='store_true', help='show generated plots')
+        parser.add_argument('-t', '--topic',
+                            help='topic name to subscribe to, default: /base/odometry_controller/odometry', type=str,
+                            default='/base/odometry_controller/odometry')
+        parser.add_argument('-csv', '--load_csv', help='name and path to csv-file e.g.: \'~/test.csv\'', type=str,
+                            default='Ingolstadt_Test3.csv')
+        parser.add_argument('-rc', '--read_csv', action='store_true', help='if flag is true a csv-file is read')
+        # parser.add_argument('-rt', '--read_topic', action='store_true',
+        #                    help='if flag is true it will be subscribed to given topic')
+        self.args = parser.parse_args()
 
     # plot data in one figure
     def plot1figure(self, xAxis, yAxis, legendLabel='legend label', xLabel='x-axis label', yLabel='y-axis label',
@@ -210,12 +226,12 @@ class JerkEvaluation:
         # plot complete jerk smoothed
         self.plot1figure(self.A[:, AD.FHS], self.A_grad_smo_jerk,
                          '$\mathrm{j_{smooth,30}}$', 'Time [s]', '$\mathrm{j\;[m/s^3]}$', 'Jerk Smoothed',
-                         axSize='auto', show=0)
+                         axSize='auto', show=1)
 
         # plot velocity and jerk
         self.plot2Subplots(self.A[:, AD.FHS], np.sqrt(self.A[:, AD.VEL_X] ** 2 + self.A[:, AD.VEL_Y] ** 2),
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
-                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=0)
+                           '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
         plt.show()
 
@@ -316,12 +332,12 @@ class JerkEvaluation:
         # return y
 
     # read data from .csv-file
-    def read_data_csv(self):
+    def read_data_csv(self, filename):
         # global A
         global m_A
         global n_A
 
-        with open('Ingolstadt_Test3.csv', 'rb') as csvfile:
+        with open(filename, 'rb') as csvfile:
             odometry_reader = csv.DictReader(csvfile, delimiter=',')
             # column_names_csv is of type 'list'
             column_names_csv = odometry_reader.fieldnames
@@ -354,26 +370,32 @@ class JerkEvaluation:
         # set time to start at 0s
         A[:, AD.TIME] = A[:, AD.TIME] - A[0, AD.TIME]
         A[:, AD.FHS] = A[:, AD.FHS] - A[0, AD.FHS]
+        # see whether scaling was wrong or not
+        if A[-1, AD.FHS] - A[0, AD.FHS] < 0.1:
+            A[:, AD.FHS] = A[:, AD.FHS] * 10 ** 9
         # save dimensions of A
         m_A, n_A = A.shape
 
-        print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
+        # print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.TIME] - A[0, AD.TIME])
         print 'Time of Interval: {:.3f} [s]'.format(A[-1, AD.FHS] - A[0, AD.FHS])
         self.A = A
 
-    def read_data_subscriber(self):
+    def read_data_subscriber(self, topic):
         # global A
         global m_A
         global n_A
 
         # instantiate class NodeListener
-        nl = listener.NodeListener()
+        if topic is not None:
+            nl = listener.NodeListener(topic)
+        else:
+            nl = listener.NodeListener()
         # subscribe to odometry
         nl.listener()
         self.A = np.array(nl.return_array())
-        print tc.OKBLUE + '=========================' + tc.ENDC
+        print tc.OKBLUE + '=' * 25 + tc.ENDC
         print tc.OKBLUE + 'Got this array: ', self.A.shape, tc.ENDC
-        print tc.OKBLUE + '=========================' + tc.ENDC
+        print tc.OKBLUE + '=' * 25 + tc.ENDC
 
         # set time to start at 0s
         self.A[:, AD.FHS] = self.A[:, AD.FHS] - self.A[0, AD.FHS]
@@ -445,7 +467,7 @@ class JerkEvaluation:
         self.A_diff = np.transpose(self.A_diff)
 
     def save_csv(self):
-        print 'Date: ' + time.strftime("%d.%m.%Y-%H:%M")
+        print 'Date: ' + time.strftime(self.timeformat)
         data_matrix = np.array([[self.data[i] for i in xrange(0, self.data.__len__())]])
         B = np.concatenate((data_matrix, self.A), axis=0)
         # fmt='%.18e' for float
@@ -471,7 +493,7 @@ class JerkEvaluation:
                 output = tc.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} [s] is bigger than max allowed jerk: {:.3f} [m/s^3]' + tc.ENDC
                 print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
                 print output.format(self.A_grad_smo_jerk[i,], self.A[i, AD.FHS], max_jerk)
-                print 'Jerk below: {:.3f} [m/s^3] at time: {:.6f} [s] is in range'.format(self.A_grad_smo_jerk[i - 1,],
+                print 'Jerk below: {:.3f} [m/s^3] at time: {:.3f} [s] is in range'.format(self.A_grad_smo_jerk[i - 1,],
                                                                                           self.A[i - 1, AD.FHS])
                 print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
                 print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
@@ -510,28 +532,43 @@ class JerkEvaluation:
     def main(self):
         # close all existing figures
         plt.close('all')
-        # self.read_data_csv()
-        self.read_data_subscriber()
+
+        # either read given csv-file...
+        if self.args.read_csv:
+            print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
+            print 'read csv-file: \'{}\''.format(self.args.load_csv)
+            print '=' * (17 + len(self.args.load_csv)) + tc.ENDC
+            self.read_data_csv(self.args.load_csv)
+        # ...or read given topic
+        else:
+            # if self.args.read_topic:
+            print tc.OKBLUE + '=' * (22 + len(self.args.topic))
+            print 'subscribe to topic: \'{}\''.format(self.args.topic)
+            print '=' * (22 + len(self.args.topic)) + tc.ENDC
+            self.read_data_subscriber(self.args.topic)
+
         self.differentiation()
-        # self.save_csv()
-        # smoothing_times_plot()
-        # jerk_comparison()
-        # smoothing_workflow_comparison()
-        self.show_figures()
+        self.save_csv()
+
+        # if jerk value is defined use it
+        if self.args.jerk is not None:
+            self.jerk_metrics(self.args.jerk)
+        else:
+            self.jerk_metrics(4.0)
+
+        # show figures
+        if self.args.show_figures:
+            je.show_figures()
+
+            # smoothing_times_plot()
+            # jerk_comparison()
+            # smoothing_workflow_comparison()
 
 
-# commandline input: -jerk=*max_jerk*
+# commandline input: --jerk *max_jerk* or -j *max_jerk*
 # if no commandline input is given, max_jerk=4.0 is set
 if __name__ == '__main__':
     je = JerkEvaluation()
     je.main()
-    if len(sys.argv) > 1:
-        jerk = sys.argv[1]
-        max_jerk = float(jerk[6:])
-        je.jerk_metrics(max_jerk)
-    else:
-        je.jerk_metrics(4.0)
-pass
 
-# TODO:
-# REVIEW:
+pass
