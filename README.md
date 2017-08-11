@@ -13,7 +13,8 @@ Included subscriber to ROS-topic
 ```
 /base/odometry_controller/
 ```
-topic, of type `nav_msgs.msg` as `Odometry.msg`. 
+
+topic, of type `nav_msgs.msg` as `Odometry.msg`.
 Access data via:
 ```
 data.header.seq
@@ -129,7 +130,7 @@ calculate_*name*.py
 - copy existing structure from one of the implemented metrics, looking like:
 ```python
 class CalculatePublishRateParamHandler
-    def parse_parameter(self, testblock_name, params)	
+    def parse_parameter(self, testblock_name, params):
 class CalculatePublishRate:
     def __init__(self, groundtruth, groundtruth_epsilon):
     def start(self, timestamp):
