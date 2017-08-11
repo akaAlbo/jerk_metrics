@@ -43,8 +43,8 @@ manually).
 ### Terminal
 The follwing commandline arguments can be passed to `main.py`:
 
-| Short | Long | Value | Description |
-|:-----:|:-------:|:-----:|:-----------:|
+| Short |   Long   | Value | Description |
+|:-----:|:--------:|:-----:|:-----------:|
 | -h | --help | [FLAG] |show this help message and exit |
 | -j JERK | --jerk JERK | JERK [int] | max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
 | -s | --show_figures | [FLAG] | show generated plots |
@@ -61,7 +61,7 @@ is setting
 ```
 jerk_metrics(self, max_jerk=4.5)
 ```
-i function. Max jerk value has to be determined empirically.
+in function. Max jerk value has to be determined empirically.
 
 ### Bandwidth
 Max allowed jerk is given as bandwidth above which jerk should not go.
