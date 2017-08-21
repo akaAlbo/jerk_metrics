@@ -68,6 +68,10 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.7.3:**
+- csv-files now saved as dtype=float64 --> data fully available
+- saved `smo_jerk` and `smo_acc` data in csv-file
+
 **V 1.7.2:**
 - [better terminal support ](https://github.com/ipa-flg-ma/jerk_metrics/tree/master#terminal)
 - `topic` in `listener.py` can now be changed, default: `/base/odometry_controller/odometry`
