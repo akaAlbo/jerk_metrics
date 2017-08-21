@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.7.3
+@version: 1.7.4
 """
 
 import csv
@@ -18,6 +18,7 @@ import listener
 import time
 from bcolors import TerminalColors as tc
 import argparse
+import os
 
 
 # AD stands for ArrayData
@@ -39,8 +40,11 @@ class JerkEvaluation:
         self.n = 1
         # smoothing parameter value [30 is good value]
         self.smo_para = 30
-
         self.timeformat = "%d_%m_%Y---%H:%M"
+
+        # path where the data is saved
+        self.filepath = 'Data/' + time.strftime(self.timeformat)
+
         # save header names for further use
         self.time = '%time'
         self.hs = 'field.header.seq'
@@ -115,8 +119,9 @@ class JerkEvaluation:
                 plt.axis(axSize)
 
             plt.legend(fontsize=15)
-            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
-                        bbox_inches='tight')
+            plt.savefig(
+                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                bbox_inches='tight')
 
             # increment figure number counter
             self.n += 1
@@ -163,8 +168,9 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.savefig('Plots/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
-                        bbox_inches='tight')
+            plt.savefig(
+                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                bbox_inches='tight')
 
             # increment figure number counter
             self.n += 1
@@ -481,7 +487,10 @@ class JerkEvaluation:
 
         B = pd.concat([df_A, df_smo_acc.smo_acc, df_smo_jerk.smo_jerk], axis=1)
 
-        B.to_csv('csv/' + time.strftime(self.timeformat) + '.csv', sep=',')
+        os.mkdir(self.filepath)
+
+        B.to_csv(self.filepath + '/' + time.strftime(self.timeformat) + '_' + str(
+            self.A[-1, AD.FHS] - self.A[0, AD.FHS]) + '.csv', sep=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
@@ -557,7 +566,6 @@ class JerkEvaluation:
             print 'subscribe to topic: \'{}\''.format(self.args.topic)
             print '=' * (22 + len(self.args.topic)) + tc.ENDC
             self.read_data_subscriber(self.args.topic)
-
 
         # print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
         # print 'read csv-file: \'{}\''.format(self.args.load_csv)
