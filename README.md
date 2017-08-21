@@ -46,11 +46,11 @@ The follwing commandline arguments can be passed to `main.py`:
 | Short |   Long   | Value | Description |
 |:-----:|:--------:|:-----:|:-----------:|
 | -h | --help | [FLAG] |show this help message and exit |
-| -j JERK | --jerk JERK | JERK [int] | max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
-| -s | --show_figures | [FLAG] | show generated plots |
-| -t TOPIC | --topic TOPIC | TOPIC [str] | topic name to subscribe to, default: '/base/odometry_controller/odometry' |
-| -csv LOAD_CSV | --load_csv CSV | LOAD_CSV [str] | name and path to csv-file e.g.: '~/test.csv' |
-| -rc | --read_csv | [FLAG] | if flag is true a csv-file is read, but it must be specified by `-csv` |
+| -j JERK | --jerk JERK | JERK [int] |max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
+| -s | --show_figures | [FLAG] |show generated plots |
+| -t TOPIC | --topic TOPIC | TOPIC [str] |topic name to subscribe to, default: '/base/odometry_controller/odometry' |
+| -csv LOAD_CSV | --load_csv CSV | LOAD_CSV [str] |name and path to csv-file e.g.: '~/test.csv' |
+| -rc | --read_csv | [FLAG] |if flag is true a csv-file is read, but it must be specified by `-csv` |
 
 
 Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
