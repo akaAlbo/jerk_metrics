@@ -6,11 +6,12 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.7.2
+@version: 1.7.3
 """
 
 import csv
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 import listener
@@ -247,7 +248,7 @@ class JerkEvaluation:
             50, window='hamming'), label='$v_{smooth,2\,times}$')
         plt.grid(True)
         plt.xlabel('Time [s]', fontsize=20)
-        plt.ylabel('v [m/s]', fontsize=20)
+        plt.ylabel('$\mathrm{v\;[m/s3]}$', fontsize=20)
         plt.title('Smoothing Comparison', fontsize=20)
         plt.legend(fontsize=15)
         plt.savefig('smoothing_plot.pdf', bbox_inches='tight')
@@ -260,9 +261,9 @@ class JerkEvaluation:
         plt.figure(self.n, figsize=(16.0, 10.0))
         for i in [10, 20, 30, 40, 50]:
             plt.plot(self.A[:, AD.TIME], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
-                     label='$j_{grad,smooth,' + str(i) + '}$')
+                     label='$\mathrm{j_{grad,smooth,' + str(i) + '}}$')
             plt.xlabel('Time [s]', fontsize=20)
-            plt.ylabel('j $[m/s^3]$', fontsize=20)
+            plt.ylabel('$\mathrm{j\;[m/s^3]}$', fontsize=20)
             plt.grid(True)
 
         plt.plot(self.A[:, AD.TIME], self.bandwidth(4.5), 'k--', label='$Bandwidth$')
@@ -404,7 +405,7 @@ class JerkEvaluation:
 
         print 'Time of Interval: {:.4f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
         # save collected data as .csv-file
-        self.save_csv()
+        # self.save_csv()
 
     # get differentiation from given data
     def differentiation(self):
@@ -468,10 +469,19 @@ class JerkEvaluation:
 
     def save_csv(self):
         print 'Date: ' + time.strftime(self.timeformat)
-        data_matrix = np.array([[self.data[i] for i in xrange(0, self.data.__len__())]])
-        B = np.concatenate((data_matrix, self.A), axis=0)
-        # fmt='%.18e' for float
-        np.savetxt('csv/' + time.strftime(self.timeformat) + '.csv', B, fmt='%s', delimiter=',')
+
+        # C_jerk = np.concatenate(([['jerk']], self.A_grad_smo_jerk.reshape(self.A_grad_smo_jerk.__len__(), 1)), axis=0)
+        # C_acc = np.concatenate(([['acc']], self.A_grad_smo_acc.reshape(self.A_grad_smo_acc.__len__(), 1)), axis=0)
+
+        data_matrix = np.array([self.data[i] for i in xrange(0, self.data.__len__())])
+
+        df_A = pd.DataFrame(data=self.A, columns=data_matrix)
+        df_smo_acc = pd.DataFrame({'smo_acc': self.A_grad_smo_acc})
+        df_smo_jerk = pd.DataFrame({'smo_jerk': self.A_grad_smo_jerk})
+
+        B = pd.concat([df_A, df_smo_acc.smo_acc, df_smo_jerk.smo_jerk], axis=1)
+
+        B.to_csv('csv/' + time.strftime(self.timeformat) + '.csv', sep=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
@@ -490,13 +500,14 @@ class JerkEvaluation:
         '''
         for i in xrange(0, m_A):
             if self.A_grad_smo_jerk[i,] >= max_jerk:
-                output = tc.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} [s] is bigger than max allowed jerk: {:.3f} [m/s^3]' + tc.ENDC
-                print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
-                print output.format(self.A_grad_smo_jerk[i,], self.A[i, AD.FHS], max_jerk)
+                output = tc.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} [s] with index [{}] is bigger than max allowed jerk: {:.3f} [m/s^3]' + tc.ENDC
+                print tc.FAIL + '=' * (output.__len__() - 6) + tc.ENDC
+                print output.format(self.A_grad_smo_jerk[i,], self.A[i, AD.FHS], i, max_jerk)
                 print 'Jerk below: {:.3f} [m/s^3] at time: {:.3f} [s] is in range'.format(self.A_grad_smo_jerk[i - 1,],
                                                                                           self.A[i - 1, AD.FHS])
-                print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
-                print tc.FAIL + '=' * (output.__len__() - 8) + tc.ENDC
+                print 'Max Jerk: {:.4f} [m/s^3] at index [{}]'.format(self.A_grad_smo_jerk.max(),
+                                                                      np.argmax(self.A_grad_smo_jerk))
+                print tc.FAIL + '=' * (output.__len__() - 6) + tc.ENDC
                 return False
         print tc.OKGREEN + '=' * 25 + tc.ENDC
         print tc.OKGREEN + 'Jerk is in desired range!' + tc.ENDC
@@ -511,7 +522,7 @@ class JerkEvaluation:
         plt.plot(self.A[:, AD.TIME], self.A_grad_acc, 'b', label='unsmoothed')
         plt.plot(self.A[:, AD.TIME], self.A_grad_acc_smo, 'k', label='smoothed after differentiation')
         plt.plot(self.A[:, AD.TIME], self.A_grad_smo_acc, 'r', label='smoothed acc x and y used')
-        plt.ylabel('a $[m/s^2]$', fontsize=20)
+        plt.ylabel('$\mathrm{a\;[m/s^2]}$$', fontsize=20)
         plt.legend()
         plt.grid(True)
 
@@ -519,7 +530,7 @@ class JerkEvaluation:
         plt.plot(self.A[:, AD.TIME], self.A_grad_jerk, 'b', label='unsmoothed')
         plt.plot(self.A[:, AD.TIME], self.A_grad_jerk_smo, 'k', label='smoothed after differentiation')
         plt.plot(self.A[:, AD.TIME], self.A_grad_smo_jerk, 'r', label='smoothed acc used for differentiation')
-        plt.ylabel('j $[m/s^3]$', fontsize=20)
+        plt.ylabel('$\mathrm{j\;[m/s^3]}$', fontsize=20)
         plt.grid(True)
 
         plt.xlabel('Time [s]', fontsize=20)
@@ -547,6 +558,12 @@ class JerkEvaluation:
             print '=' * (22 + len(self.args.topic)) + tc.ENDC
             self.read_data_subscriber(self.args.topic)
 
+
+        # print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
+        # print 'read csv-file: \'{}\''.format(self.args.load_csv)
+        # print '=' * (17 + len(self.args.load_csv)) + tc.ENDC
+        # self.read_data_csv(self.args.load_csv)
+
         self.differentiation()
         self.save_csv()
 
@@ -554,7 +571,7 @@ class JerkEvaluation:
         if self.args.jerk is not None:
             self.jerk_metrics(self.args.jerk)
         else:
-            self.jerk_metrics(4.0)
+            self.jerk_metrics(3.0)
 
         # show figures
         if self.args.show_figures:
@@ -572,3 +589,5 @@ if __name__ == '__main__':
     je.main()
 
 pass
+
+# TODO: add jerk data to .csv-file
