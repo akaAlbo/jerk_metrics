@@ -3,8 +3,8 @@ Writing a python programm to get the `/base/odometry_controller`-speed and use i
 
 ## Usage
 ### Plots
-All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "/Plots" (which has to be created
-manually), named according to plotted data including timestamp. See example:
+All generated plots are saved as pdf-file for further usage. All plots are saved in subfolder `/Data/*Timestamp*` (folder is created automatically), 
+named according to plotted data including timestamp. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
 
 
@@ -37,8 +37,10 @@ Example: `sec: 121 [s]` | `nsecs: 702000000 [ns]` --> `121.702000000 [s]`
 Precision should be sufficient for differentiation, but nanoseconds are not really supported.
 
 ### .csv-Files
-The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder "/csv" (which has to be created
-manually). 
+The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder `Data/*Timestamp*` (created
+automatically), together with the plotted data. The `.csv`-file includes the smoothed acceleration and
+smoothed jerk data, and is named like `%d_%m_%Y---%H:%M_*.**` where the last `*.**` is the length of the collected data
+in seconds.
 
 ### Terminal
 The follwing commandline arguments can be passed to `main.py`:
@@ -68,6 +70,11 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.7.4:**
+- csv-file now includes length in seconds in filename `%d.%m.%Y---%H:%M_*.**`
+- directory `Data/Timestamp` now created automatically
+- all files (plots and csv-files) now saved in `Data/Timestamp`-folder
+
 **V 1.7.3:**
 - csv-files now saved as dtype=float64 --> data fully available
 - saved `smo_jerk` and `smo_acc` data in csv-file
