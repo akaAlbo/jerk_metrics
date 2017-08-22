@@ -3,6 +3,9 @@
 Created on Aug 22, 2017
 
 @attention: Rosbag Pandas
+@download: https://pypi.python.org/pypi/rosbag_pandas/0.5.0.0
+@github: https://github.com/aktaylor08/RosbagPandas
+@author: Adam Taylor
 @version: 1.0.0
 """
 
