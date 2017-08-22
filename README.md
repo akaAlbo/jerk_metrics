@@ -3,8 +3,8 @@ Writing a python programm to get the `/base/odometry_controller`-speed and use i
 
 ## Usage
 ### Plots
-All generated plots are saved as pdf-file for further usage. The archive file includes all plots in subfolder "/Plots" (which has to be created
-manually), named according to plotted data including timestamp. See example:
+All generated plots are saved as pdf-file for further usage. All plots are saved in subfolder `/Data/*Timestamp*` (folder is created automatically), 
+named according to plotted data including timestamp. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
 
 
@@ -37,8 +37,10 @@ Example: `sec: 121 [s]` | `nsecs: 702000000 [ns]` --> `121.702000000 [s]`
 Precision should be sufficient for differentiation, but nanoseconds are not really supported.
 
 ### .csv-Files
-The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder "/csv" (which has to be created
-manually). 
+The collected data from the subscriber can be stored as a `.csv`-file, saved in subfolder `Data/*Timestamp*` (created
+automatically), together with the plotted data. The `.csv`-file includes the smoothed acceleration and
+smoothed jerk data, and is named like `%d_%m_%Y---%H:%M_*.**` where the last `*.**` is the length of the collected data
+in seconds.
 
 ### Terminal
 The follwing commandline arguments can be passed to `main.py`:
@@ -46,12 +48,13 @@ The follwing commandline arguments can be passed to `main.py`:
 | Short |   Long   | Value | Description |
 |:-----:|:--------:|:-----:|:-----------:|
 | -h | --help | [FLAG] |show this help message and exit |
-| -j JERK | --jerk JERK | JERK [int] | max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
-| -s | --show_figures | [FLAG] | show generated plots |
-| -t TOPIC | --topic TOPIC | TOPIC [str] | topic name to subscribe to, default: '/base/odometry_controller/odometry' |
-| -csv LOAD_CSV | --load_csv CSV | LOAD_CSV [str] | name and path to csv-file e.g.: '~/test.csv' |
-| -rc | --read_csv | [FLAG] | if flag is true a csv-file is read, but it must be specified by `-csv` |
-
+| -j JERK | --jerk JERK | JERK [int] |max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
+| -s | --show_figures | [FLAG] |show generated plots |
+| -t TOPIC | --topic TOPIC | TOPIC [str] |topic name to subscribe to, default: '/base/odometry_controller/odometry' |
+| -csv LOAD_CSV | --load_csv LOAD_CSV | LOAD_CSV [str] |name and path to csv-file e.g.: '~/test.csv' |
+| -bag LOAD_BAG | --load_bag LOAD_BAG | LOAD_BAG [str] |name and path to bag-file e.g.: '~/test.bag' |
+| -rc | --read_csv | [FLAG] |if flag is true a csv-file is read, but it must be specified by `-csv` |
+| -rb | --read_bag | [FLAG] |if flag is true a bag-file is read, but it must be specified by `-bag` |
 
 Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
 ```
@@ -68,6 +71,20 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.8.0:**
+- data can now be collected directly from a `.bag`-file
+- new terminal arguments for bagfile-support
+- [terminal commands](https://github.com/ipa-flg-ma/jerk_metrics/tree/master#terminal)
+
+**V 1.7.4:**
+- csv-file now includes length in seconds in filename `%d.%m.%Y---%H:%M_*.**`
+- directory `Data/Timestamp` now created automatically
+- all files (plots and csv-files) now saved in `Data/Timestamp`-folder
+
+**V 1.7.3:**
+- csv-files now saved as dtype=float64 --> data fully available
+- saved `smo_jerk` and `smo_acc` data in csv-file
+
 **V 1.7.2:**
 - [better terminal support ](https://github.com/ipa-flg-ma/jerk_metrics/tree/master#terminal)
 - `topic` in `listener.py` can now be changed, default: `/base/odometry_controller/odometry`
