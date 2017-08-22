@@ -51,9 +51,10 @@ The follwing commandline arguments can be passed to `main.py`:
 | -j JERK | --jerk JERK | JERK [int] |max allowed jerk for jerk metrics, default = 4.0 [m/s^3] |
 | -s | --show_figures | [FLAG] |show generated plots |
 | -t TOPIC | --topic TOPIC | TOPIC [str] |topic name to subscribe to, default: '/base/odometry_controller/odometry' |
-| -csv LOAD_CSV | --load_csv CSV | LOAD_CSV [str] |name and path to csv-file e.g.: '~/test.csv' |
+| -csv LOAD_CSV | --load_csv LOAD_CSV | LOAD_CSV [str] |name and path to csv-file e.g.: '~/test.csv' |
+| -bag LOAD_BAG | --load_bag LOAD_BAG | LOAD_BAG [str] |name and path to bag-file e.g.: '~/test.bag' |
 | -rc | --read_csv | [FLAG] |if flag is true a csv-file is read, but it must be specified by `-csv` |
-
+| -rb | --read_bag | [FLAG] |if flag is true a bag-file is read, but it must be specified by `-bag` |
 
 Compare all jerk-data to maximum and give either passed or failed feedback (added terminal colour support: failed -- red | passed -- green)
 ```
@@ -70,6 +71,11 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.8.0:**
+- data can now be collected directly from a `.bag`-file
+- new terminal arguments for bagfile-support
+- [terminal commands](https://github.com/ipa-flg-ma/jerk_metrics/tree/master#terminal)
+
 **V 1.7.4:**
 - csv-file now includes length in seconds in filename `%d.%m.%Y---%H:%M_*.**`
 - directory `Data/Timestamp` now created automatically
