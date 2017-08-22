@@ -79,7 +79,7 @@ class JerkEvaluation:
         self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.float64)
 
         self.A_diff = np.ones([0, 8], dtype=np.double)
-        self.args = 0
+        self.args = self.build_parser().parse_args()
 
     def build_parser(self):
         parser = argparse.ArgumentParser(
@@ -97,7 +97,8 @@ class JerkEvaluation:
         parser.add_argument('-rb', '--read_bag', action='store_true', help='if flag is true a bag-file is read')
         # parser.add_argument('-rt', '--read_topic', action='store_true',
         #                    help='if flag is true it will be subscribed to given topic')
-        self.args = parser.parse_args()
+        # self.args = parser.parse_args()
+        return parser
 
     # plot data in one figure
     def plot1figure(self, xAxis, yAxis, legendLabel='legend label', xLabel='x-axis label', yLabel='y-axis label',
@@ -271,13 +272,13 @@ class JerkEvaluation:
     def jerk_comparison(self):
         plt.figure(self.n, figsize=(16.0, 10.0))
         for i in [10, 20, 30, 40, 50]:
-            plt.plot(self.A[:, AD.TIME], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
+            plt.plot(self.A[:, AD.FHS], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
                      label='$\mathrm{j_{grad,smooth,' + str(i) + '}}$')
             plt.xlabel('Time [s]', fontsize=20)
             plt.ylabel('$\mathrm{j\;[m/s^3]}$', fontsize=20)
             plt.grid(True)
 
-        plt.plot(self.A[:, AD.TIME], self.bandwidth(4.5), 'k--', label='$Bandwidth$')
+        plt.plot(self.A[:, AD.FHS], self.bandwidth(4.5), 'k--', label='$\mathrm{Bandwidth}$')
         plt.title('Jerk comparison different smoothing', fontsize=20)
         plt.legend(fontsize=15)
         plt.axis([18, 23, -.5, 7])
@@ -582,8 +583,6 @@ class JerkEvaluation:
         # close all existing figures
         plt.close('all')
 
-        self.build_parser()
-
         # either read given csv-file...
         if self.args.read_csv:
             print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
@@ -621,13 +620,13 @@ class JerkEvaluation:
         else:
             self.jerk_metrics(4.0)
 
+        # smoothing_times_plot()
+        # smoothing_workflow_comparison()
+        # self.jerk_comparison()
+
         # show figures
         if self.args.show_figures:
             je.show_figures()
-
-            # smoothing_times_plot()
-            # jerk_comparison()
-            # smoothing_workflow_comparison()
 
 
 # commandline input: --jerk *max_jerk* or -j *max_jerk*
