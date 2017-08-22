@@ -6,12 +6,13 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.7.4
+@version: 1.8.0
 """
 
 import csv
 import numpy as np
 import pandas as pd
+import rosbag_pandas as rp
 import matplotlib.pyplot as plt
 import sys
 import listener
@@ -78,7 +79,9 @@ class JerkEvaluation:
         self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.float64)
 
         self.A_diff = np.ones([0, 8], dtype=np.double)
+        self.args = 0
 
+    def build_parser(self):
         parser = argparse.ArgumentParser(
             description='Calculate jerk from a given topic publishing velocity. Standard: subscribe to topic \'/base/odometry_controller/odometry\'')
         # group = parser.add_mutually_exclusive_group()
@@ -89,7 +92,9 @@ class JerkEvaluation:
                             default='/base/odometry_controller/odometry')
         parser.add_argument('-csv', '--load_csv', help='name and path to csv-file e.g.: \'~/test.csv\'', type=str,
                             default='Ingolstadt_Test3.csv')
+        parser.add_argument('-bag', '--load_bag', help='name and path to bag-file e.g.: \'~/test.bag\'', type=str)
         parser.add_argument('-rc', '--read_csv', action='store_true', help='if flag is true a csv-file is read')
+        parser.add_argument('-rb', '--read_bag', action='store_true', help='if flag is true a bag-file is read')
         # parser.add_argument('-rt', '--read_topic', action='store_true',
         #                    help='if flag is true it will be subscribed to given topic')
         self.args = parser.parse_args()
@@ -410,8 +415,32 @@ class JerkEvaluation:
         m_A, n_A = self.A.shape
 
         print 'Time of Interval: {:.4f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
-        # save collected data as .csv-file
-        # self.save_csv()
+
+    # read data directly from a bagfile
+    def read_data_bagfile(self, bagname, exclude=None, include='/base/odometry_controller/odometry'):
+        global m_A
+        global n_A
+
+        df = rp.bag_to_dataframe(bagname, include=include, exclude=exclude, seconds=True)
+
+        fieldnames = []
+        for dat in self.data:
+            inc = include[1:] + '__'
+            fieldnames.append((inc.replace('/', '_') + dat[6:]).replace('.', '_'))
+        fieldnames[2] = 'index'
+
+        # save fieldnames from dataframe to matrix A
+        A = df.reset_index()[[fieldnames[i] for i in xrange(2, fieldnames.__len__())]].as_matrix()
+        # dummy data for '%time' and 'field.header.stamp', because both are not necessary
+        B = np.ones([A.shape[0], 2])
+        # put data matrix A and dummy matrix B together
+        A = np.concatenate((B, A), axis=1)
+        # set time to start at 0s
+        A[:, AD.FHS] = A[:, AD.FHS] - A[0, AD.FHS]
+
+        m_A, n_A = A.shape
+        self.A = A
+        print 'Time of Interval: {:.4f} [s]'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])
 
     # get differentiation from given data
     def differentiation(self):
@@ -490,7 +519,7 @@ class JerkEvaluation:
         os.mkdir(self.filepath)
 
         B.to_csv(self.filepath + '/' + time.strftime(self.timeformat) + '_' + str(
-            self.A[-1, AD.FHS] - self.A[0, AD.FHS]) + '.csv', sep=',')
+            '{:.3f}'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])) + '.csv', sep=',')
 
     # creating bandwidth matrix
     def bandwidth(self, max):
@@ -553,12 +582,23 @@ class JerkEvaluation:
         # close all existing figures
         plt.close('all')
 
+        self.build_parser()
+
         # either read given csv-file...
         if self.args.read_csv:
             print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
             print 'read csv-file: \'{}\''.format(self.args.load_csv)
             print '=' * (17 + len(self.args.load_csv)) + tc.ENDC
             self.read_data_csv(self.args.load_csv)
+
+        # ... or given bagfile...
+        elif self.args.read_bag:
+            print tc.OKBLUE + '=' * (17 + len(self.args.load_bag))
+            print 'read bag-file: \'{}\''.format(self.args.load_bag)
+            print '=' * (17 + len(self.args.load_bag)) + tc.ENDC
+            self.read_data_bagfile(self.args.load_bag)
+
+
         # ...or read given topic
         else:
             # if self.args.read_topic:
@@ -579,7 +619,7 @@ class JerkEvaluation:
         if self.args.jerk is not None:
             self.jerk_metrics(self.args.jerk)
         else:
-            self.jerk_metrics(3.0)
+            self.jerk_metrics(4.0)
 
         # show figures
         if self.args.show_figures:
@@ -597,5 +637,3 @@ if __name__ == '__main__':
     je.main()
 
 pass
-
-# TODO: add jerk data to .csv-file
