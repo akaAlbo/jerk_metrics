@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.8.0
+@version: 1.8.2
 """
 
 import csv
@@ -20,6 +20,7 @@ import time
 from bcolors import TerminalColors as tc
 import argparse
 import os
+import shutil
 
 
 # AD stands for ArrayData
@@ -44,7 +45,7 @@ class JerkEvaluation:
         self.timeformat = "%d_%m_%Y---%H:%M"
 
         # path where the data is saved
-        self.filepath = 'Data/' + time.strftime(self.timeformat)
+        self.dirpath = 'Data/' + time.strftime(self.timeformat)
 
         # save header names for further use
         self.time = '%time'
@@ -79,7 +80,7 @@ class JerkEvaluation:
         self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.float64)
 
         self.A_diff = np.ones([0, 8], dtype=np.double)
-        self.args = 0
+        self.args = self.build_parser().parse_args()
 
     def build_parser(self):
         parser = argparse.ArgumentParser(
@@ -97,8 +98,10 @@ class JerkEvaluation:
         parser.add_argument('-rb', '--read_bag', action='store_true', help='if flag is true a bag-file is read')
         # parser.add_argument('-rt', '--read_topic', action='store_true',
         #                    help='if flag is true it will be subscribed to given topic')
-        self.args = parser.parse_args()
+        # self.args = parser.parse_args()
+        return parser
 
+    # TODO: plot multiple data sets in one figure: e.g. bandwith and jerk data in one figure
     # plot data in one figure
     def plot1figure(self, xAxis, yAxis, legendLabel='legend label', xLabel='x-axis label', yLabel='y-axis label',
                     title='plot', axSize='auto', show=0):
@@ -125,7 +128,7 @@ class JerkEvaluation:
 
             plt.legend(fontsize=15)
             plt.savefig(
-                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -174,7 +177,7 @@ class JerkEvaluation:
             # legend: loc='best' sets legend to best location
             plt.legend()
             plt.savefig(
-                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -245,7 +248,8 @@ class JerkEvaluation:
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
                            '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
-        plt.show()
+        # files are saved but not shown directly in when program is executed
+        # plt.show()
 
     # plot smoothing comparison between 1x and 2x smoothing
     def smoothing_times_plot(self):
@@ -271,13 +275,13 @@ class JerkEvaluation:
     def jerk_comparison(self):
         plt.figure(self.n, figsize=(16.0, 10.0))
         for i in [10, 20, 30, 40, 50]:
-            plt.plot(self.A[:, AD.TIME], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
+            plt.plot(self.A[:, AD.FHS], self.smooth(self.A_grad_jerk[:, ], i, window='hanning'),
                      label='$\mathrm{j_{grad,smooth,' + str(i) + '}}$')
             plt.xlabel('Time [s]', fontsize=20)
             plt.ylabel('$\mathrm{j\;[m/s^3]}$', fontsize=20)
             plt.grid(True)
 
-        plt.plot(self.A[:, AD.TIME], self.bandwidth(4.5), 'k--', label='$Bandwidth$')
+        plt.plot(self.A[:, AD.FHS], self.bandwidth(4.5), 'k--', label='$\mathrm{Bandwidth}$')
         plt.title('Jerk comparison different smoothing', fontsize=20)
         plt.legend(fontsize=15)
         plt.axis([18, 23, -.5, 7])
@@ -516,9 +520,24 @@ class JerkEvaluation:
 
         B = pd.concat([df_A, df_smo_acc.smo_acc, df_smo_jerk.smo_jerk], axis=1)
 
-        os.mkdir(self.filepath)
+        if os.path.exists(self.dirpath):
+            for i in xrange(1, 100):
+                if os.path.exists(self.dirpath + '__' + str(i)):
+                    continue
+                else:
+                    filepath = self.dirpath + '__' + str(i)
+                    os.mkdir(filepath)
+                    self.dirpath = filepath
+                    break
+        else:
+            os.mkdir(self.dirpath)
+            filepath = self.dirpath
 
-        B.to_csv(self.filepath + '/' + time.strftime(self.timeformat) + '_' + str(
+        # copy bagfile in created folder together with saved .csv-file
+        if self.args.read_bag:
+            shutil.copy2(self.args.load_bag, filepath)
+
+        B.to_csv(filepath + '/' + time.strftime(self.timeformat) + '_' + str(
             '{:.3f}'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])) + '.csv', sep=',')
 
     # creating bandwidth matrix
@@ -582,8 +601,6 @@ class JerkEvaluation:
         # close all existing figures
         plt.close('all')
 
-        self.build_parser()
-
         # either read given csv-file...
         if self.args.read_csv:
             print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
@@ -621,13 +638,13 @@ class JerkEvaluation:
         else:
             self.jerk_metrics(4.0)
 
+        # smoothing_times_plot()
+        # smoothing_workflow_comparison()
+        # self.jerk_comparison()
+
         # show figures
         if self.args.show_figures:
             je.show_figures()
-
-            # smoothing_times_plot()
-            # jerk_comparison()
-            # smoothing_workflow_comparison()
 
 
 # commandline input: --jerk *max_jerk* or -j *max_jerk*
