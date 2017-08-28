@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.8.1
+@version: 1.8.2
 """
 
 import csv
@@ -20,6 +20,7 @@ import time
 from bcolors import TerminalColors as tc
 import argparse
 import os
+import shutil
 
 
 # AD stands for ArrayData
@@ -100,6 +101,7 @@ class JerkEvaluation:
         # self.args = parser.parse_args()
         return parser
 
+    # TODO: plot multiple data sets in one figure: e.g. bandwith and jerk data in one figure
     # plot data in one figure
     def plot1figure(self, xAxis, yAxis, legendLabel='legend label', xLabel='x-axis label', yLabel='y-axis label',
                     title='plot', axSize='auto', show=0):
@@ -246,7 +248,8 @@ class JerkEvaluation:
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
                            '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
-        plt.show()
+        # files are saved but not shown directly in when program is executed
+        # plt.show()
 
     # plot smoothing comparison between 1x and 2x smoothing
     def smoothing_times_plot(self):
@@ -523,12 +526,16 @@ class JerkEvaluation:
                     continue
                 else:
                     filepath = self.dirpath + '__' + str(i)
-                    # os.mkdir(self.dirpath + '__' + str(i))
                     os.mkdir(filepath)
+                    self.dirpath = filepath
                     break
         else:
             os.mkdir(self.dirpath)
             filepath = self.dirpath
+
+        # copy bagfile in created folder together with saved .csv-file
+        if self.args.read_bag:
+            shutil.copy2(self.args.load_bag, filepath)
 
         B.to_csv(filepath + '/' + time.strftime(self.timeformat) + '_' + str(
             '{:.3f}'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])) + '.csv', sep=',')
