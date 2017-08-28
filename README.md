@@ -71,6 +71,12 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 ![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
 
 ## History
+**V 1.8.1:**
+- solved problem with existing directory if multiple bagfiles or csv-files were evaluated in short time 
+(i.e. timestamp hasn't changed since last evaluated file --> problem with creating directory because it already 
+exists).
+- now possible to evaluated many bagfiles or csv-files in short time
+
 **V 1.8.0:**
 - data can now be collected directly from a `.bag`-file
 - new terminal arguments for bagfile-support
