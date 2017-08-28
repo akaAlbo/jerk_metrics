@@ -27,3 +27,5 @@ if __name__ == '__main__':
         print main_file + ' -rb -bag ' + f + ' -s'
         # evaluate all the bagfiles using the main.py programm
         os.system(main_file + ' -rb -bag ' + f + ' -s')
+
+pass
