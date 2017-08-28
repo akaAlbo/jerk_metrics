@@ -16,6 +16,7 @@ import glob
 if __name__ == '__main__':
     path = '/home/flg-ma/bagfiles/ipa-apartment/bags'
     # files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
     files = glob.glob(path + '/' + 'ipa-apartment*.bag')
     main_file = '/home/flg-ma/PycharmProjects/jerk_metrics/jerk/main.py'
 
@@ -24,4 +25,5 @@ if __name__ == '__main__':
     for f in files:
         print tc.OKBLUE + '=' * (67 + f.__len__())
         print main_file + ' -rb -bag ' + f + ' -s'
+        # evaluate all the bagfiles using the main.py programm
         os.system(main_file + ' -rb -bag ' + f + ' -s')
