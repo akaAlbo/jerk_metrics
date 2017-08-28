@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.8.0
+@version: 1.8.1
 """
 
 import csv
@@ -44,7 +44,7 @@ class JerkEvaluation:
         self.timeformat = "%d_%m_%Y---%H:%M"
 
         # path where the data is saved
-        self.filepath = 'Data/' + time.strftime(self.timeformat)
+        self.dirpath = 'Data/' + time.strftime(self.timeformat)
 
         # save header names for further use
         self.time = '%time'
@@ -126,7 +126,7 @@ class JerkEvaluation:
 
             plt.legend(fontsize=15)
             plt.savefig(
-                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -175,7 +175,7 @@ class JerkEvaluation:
             # legend: loc='best' sets legend to best location
             plt.legend()
             plt.savefig(
-                self.filepath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -517,9 +517,20 @@ class JerkEvaluation:
 
         B = pd.concat([df_A, df_smo_acc.smo_acc, df_smo_jerk.smo_jerk], axis=1)
 
-        os.mkdir(self.filepath)
+        if os.path.exists(self.dirpath):
+            for i in xrange(1, 100):
+                if os.path.exists(self.dirpath + '__' + str(i)):
+                    continue
+                else:
+                    filepath = self.dirpath + '__' + str(i)
+                    # os.mkdir(self.dirpath + '__' + str(i))
+                    os.mkdir(filepath)
+                    break
+        else:
+            os.mkdir(self.dirpath)
+            filepath = self.dirpath
 
-        B.to_csv(self.filepath + '/' + time.strftime(self.timeformat) + '_' + str(
+        B.to_csv(filepath + '/' + time.strftime(self.timeformat) + '_' + str(
             '{:.3f}'.format(self.A[-1, AD.FHS] - self.A[0, AD.FHS])) + '.csv', sep=',')
 
     # creating bandwidth matrix
