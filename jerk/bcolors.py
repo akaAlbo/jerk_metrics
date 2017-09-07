@@ -5,7 +5,7 @@ Created on Aug 10, 2017
 
 @author: flg-ma
 @attention: Jerk Metric
-@contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
+@contact: albus.marcel@gmail.com (Marcel Albus)
 @version: 1.0
 """
 
