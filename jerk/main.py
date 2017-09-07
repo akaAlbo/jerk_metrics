@@ -349,6 +349,11 @@ class JerkEvaluation:
 
     # read data from .csv-file
     def read_data_csv(self, filename):
+        '''
+        read data from a given csv-file
+        :param filename: path to csv-file
+        :return: --
+        '''
         # global A
         global m_A
         global n_A
@@ -397,6 +402,11 @@ class JerkEvaluation:
         self.A = A
 
     def read_data_subscriber(self, topic):
+        '''
+        read data from a topic and save it in array
+        :param topic: topic to read data from
+        :return: --
+        '''
         # global A
         global m_A
         global n_A
@@ -422,6 +432,13 @@ class JerkEvaluation:
 
     # read data directly from a bagfile
     def read_data_bagfile(self, bagname, exclude=None, include='/base/odometry_controller/odometry'):
+        '''
+        read data from a bagfile generated with ros
+        :param bagname: path to bagfile
+        :param exclude: exclude topics (regular expression possible)
+        :param include: include topics (regular expression possible)
+        :return: --
+        '''
         global m_A
         global n_A
 
