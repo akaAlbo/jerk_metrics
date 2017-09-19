@@ -260,6 +260,9 @@ test_project/
  - test_configs:
    directory for test configurations, each test is configured in one <test_config_name>.yaml file
    (e.g. `test1.yaml`)
+ - `application.launch`:
+   `launch`-file includes information about the ROS configs (e.g. 'saturn-ingolstadt' or 'ipa-apartment' environment config),
+   and includes gazebo and RVIZ startup
  
 2. config:
   - robot_envs:
@@ -306,9 +309,33 @@ testblock_nav:
       groundtruth_epsilon: 5
 ```
   In the `test1.yaml` you define the different metrics, the groundtruth and groundtruth epsilon for those metrics, 
-  and the topics (if necessary). All the chosen metrics are applied in *one* test-run of ATF.
+  and the topics (if necessary). All the chosen metrics are applied in *one* test-run of ATF. 
+  You can add additional parameters to extend the provided information for the metrics:
+```yaml
+testblock_nav:
+
+  goal:
+    - topic: /move_base/goal
+      groundtruth_angle: 0.0 # [degree]
+      groundtruth_angle_epsilon: 20.0 # [degree]
+      groundtruth: 0.0 # [m]
+      groundtruth_epsilon: 0.2 # [m]
+```
+  Those additional parameters have to be collected in the `metrics.py`-file using the following line:
+```python
+    def parse_parameter(self, testblock_name, params):
+    
+    [...]
+    
+        metrics.append(CalculateGoal(metric["topic"],
+                                     metric["groundtruth_angle"],           # added in 'test.yaml' config in 'test_configs'
+                                     metric["groundtruth_angle_epsilon"],   # added in 'test.yaml' config in 'test_configs'
+                                     groundtruth,
+                                     groundtruth_epsilon))
+```
   
-  | Groundtruth | Groundtruth Epsilon |
+  | Name | Definition |
   |:------------:|:---------------:|
-  | defines the expected value | defines max allowed +/- for the groundtruth |
-  | example: 5 [m] | example: +/- 0,1 [m] |
+  | groundtruth | defines the expected value, example: 5 [m] 
+  | groundtruth_epsilon | defines max allowed +/- for the groundtruth, example: +/- 0,1 [m] |
+  | topic | defines subscribed topic |
