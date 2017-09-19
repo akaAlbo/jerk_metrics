@@ -272,8 +272,8 @@ additional_arguments: {}                                 # Name and value of add
 ```
   - robots:
 ```yaml
-goal:                                          # Topics for the metric 'goal'
-  topics:
+goal:                                          
+  topics:                                             # Topics for the metric 'goal'
     - "/base_pose_ground_truth"
     - "/move_base/goal"
 wait_for_topics: [/move_base/status]                  # Names of the topics to wait for before beginning the test
@@ -336,6 +336,6 @@ testblock_nav:
   
   | Name | Definition |
   |:------------:|:---------------:|
-  | groundtruth | defines the expected value, example: 5 [m] 
-  | groundtruth_epsilon | defines max allowed +/- for the groundtruth, example: +/- 0,1 [m] |
-  | topic | defines subscribed topic |
+  | groundtruth |defines the expected value, example: 5 [m] 
+  | groundtruth_epsilon |defines max allowed +/- for the groundtruth, example: +/- 0,1 [m] |
+  | topic |defines subscribed topic |
