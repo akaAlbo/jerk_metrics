@@ -248,7 +248,7 @@ class JerkEvaluation:
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
                            '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
-        # files are saved but not shown directly in when program is executed
+        # files are saved but not shown directly when program is executed
         # plt.show()
 
     # plot smoothing comparison between 1x and 2x smoothing
