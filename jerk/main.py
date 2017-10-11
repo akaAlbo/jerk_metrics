@@ -157,8 +157,9 @@ class JerkEvaluation:
         """
 
         if show == 1:
-            plt.figure(self.n, figsize=(16.0, 10.0))
-            plt.subplot(211)
+            fig = plt.figure(self.n, figsize=(16.0, 10.0))
+            # plt.subplot(211)
+            ax1 = fig.add_subplot(211)
             plt.plot(xAxis, yAxis1, 'r', label=legendLabel1)
             plt.title(title, fontsize=20)
             plt.ylabel(yLabel1, fontsize=20)
@@ -167,7 +168,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.subplot(212)
+            # plt.subplot(212)
+            ax2 = fig.add_subplot(212)
             plt.plot(xAxis, yAxis2, 'g', label=legendLabel2)
             plt.xlabel(xLabel, fontsize=20)
             plt.ylabel(yLabel2, fontsize=20)
@@ -176,6 +178,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
+            self.annotate_max(xAxis, yAxis2, ax2)
+            self.annotate_max(xAxis, yAxis1, ax1)
             plt.savefig(
                 self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
@@ -184,6 +188,23 @@ class JerkEvaluation:
             self.n += 1
         else:
             pass
+
+    def annotate_max(self, x, y, ax=None):
+        #TODO: implement if for ax1 or ax2 with 'vel' and 'jerk' as text
+        xmax = x[np.argmax(y)]
+        ymax = y.max()
+        x_max_string = '{:.3f}'.format(xmax)
+        y_max_string = '{:.3f}'.format(ymax)
+        text = '$\mathrm{t}=' + x_max_string + ',\quad' + '\mathrm{j_{max}}=' + y_max_string + '$'
+        if not ax:
+            ax = plt.gca()
+        bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+        # arrowprops = dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=60")
+        # kw = dict(xycoords='data', textcoords="axes fraction",
+        #           arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+        kw = dict(xycoords='data', textcoords="axes fraction",
+                  bbox=bbox_props, ha="left", va="top")
+        ax.annotate(text, xy=(xmax, ymax), xytext=(0.21, 0.96), **kw)
 
     # plot the specified figures
     def show_figures(self):
