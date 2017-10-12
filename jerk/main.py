@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.8.2
+@version: 1.9.0
 """
 
 import csv

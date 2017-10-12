@@ -68,9 +68,13 @@ in function. Max jerk value has to be determined empirically.
 
 ### Bandwidth
 Max allowed jerk is given as bandwidth above which jerk should not go.
-![Jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/Jerk_with_bandwith.png)
+![jerk_with_bandwith](https://github.com/ipa-flg-ma/jerk_metrics/blob/ipa/jerk_with_bandwith.png)
 
 ## History
+**V 1.9.0:**
+- `annotate_max` function implemented
+- text box in plots is shown with `v` or `j` max values, and  `time` at which they occur
+
 **V 1.8.1:**
 - solved problem with existing directory if multiple bagfiles or csv-files were evaluated in short time 
 (i.e. timestamp hasn't changed since last evaluated file --> problem with creating directory because it already 
