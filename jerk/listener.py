@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 '''
+@author: flg-ma
+@attention: listener for given topic
+@contact: albus.marcel@gmail.com (Marcel Albus)
 @source: http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29
 '''
 

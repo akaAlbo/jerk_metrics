@@ -134,8 +134,10 @@ class CalculateJerk:
         self.smo_para = 30
         # create array for further use
         self.A_listener = np.ones([0, 8], dtype=np.double)
-        # rospy.init_node('listener', anonymous=True)
-        rospy.Subscriber(self.topic, Odometry, self.callback, queue_size=1)
+        # queue_size=None --> queue size is infinite, needed to calculate the right jerk
+        rospy.Subscriber(self.topic, Odometry, self.callback, queue_size=None)
+
+        self.A_grad_smo_jerk = np.ones([0, 8], dtype=np.double)
 
 
     # def listener(self):
@@ -175,6 +177,12 @@ class CalculateJerk:
         self.stop_time = timestamp
         self.finished = True
 
+#        rospy.loginfo('\033[94m' + '=' * 82 + '\033[0m')
+#        result = self.get_result()
+#        rospy.loginfo('\033[94m' + '=' * 82 + '\033[0m')
+#        rospy.loginfo('\033[94m' + 'Result: ' + str(result) + '\033[0m')
+#        rospy.loginfo('\033[94m' + '=' * 82 + '\033[0m')
+
     def pause(self, timestamp):
         # TODO: Implement pause time and counter calculation
         # FIXME: check rate calculation in case of pause (counter, start_time and stop_time)
@@ -185,15 +193,11 @@ class CalculateJerk:
 
     # get differentiation from given data
     def differentiation(self):
-        global A_grad_smo_jerk
-        global m_A
 
         print bcolors.OKBLUE + 'Got this array: ', self.A_listener.shape, bcolors.ENDC
 
         # set time to start at 0s
         self.A_listener[:, AD.FHS] = self.A_listener[:, AD.FHS] - self.A_listener[0, AD.FHS]
-        # save dimensions of A
-        m_A, n_A = self.A_listener.shape
 
         # differentiation
         # compute acceleration from velocity by differentiation
@@ -209,27 +213,29 @@ class CalculateJerk:
         # (x^2+y^2)^0.5 to get absolute jerk
         A_grad_smo_jerk = np.sqrt(A_grad_smo_jerk_x[:, ] ** 2 + A_grad_smo_jerk_y[:, ] ** 2)
 
+        self.A_grad_smo_jerk = A_grad_smo_jerk
+
     def get_result(self):
         groundtruth_result = None
         details = {"topic": self.topic}
         if self.finished:
             if self.groundtruth != None and self.groundtruth_epsilon != None:
                 self.differentiation()
-                for i in xrange(0, m_A):
-                    if A_grad_smo_jerk[i,] >= self.groundtruth_epsilon:
+                for i in xrange(0, self.A_grad_smo_jerk.shape[0]):
+                    if self.A_grad_smo_jerk[i,] >= self.groundtruth_epsilon:
                         output = bcolors.FAIL + 'Jerk: {:.3f} [m/s^3] at time: {:.6f} s is bigger than max ' \
                                                 'allowed jerk: {:.3f} [m/s^3]' + bcolors.ENDC
-                        print output.format(A_grad_smo_jerk[i,], self.A_listener[i, AD.FHS], self.groundtruth_epsilon)
-                        print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
-                        data = float(A_grad_smo_jerk.max())
+                        print output.format(self.A_grad_smo_jerk[i,], self.A_listener[i, AD.FHS], self.groundtruth_epsilon)
+                        print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
+                        data = float(self.A_grad_smo_jerk.max())
                         groundtruth_result = False
                         break
                     else:
-                        data = float(A_grad_smo_jerk.max())
+                        data = float(self.A_grad_smo_jerk.max())
                         groundtruth_result = True
                 if groundtruth_result:
                     print bcolors.OKGREEN + 'Jerk is in desired range!' + bcolors.ENDC
-                    print 'Max Jerk: {:.4f} [m/s^3]'.format(A_grad_smo_jerk.max())
+                    print 'Max Jerk: {:.4f} [m/s^3]'.format(self.A_grad_smo_jerk.max())
             return "jerk", data, groundtruth_result, self.groundtruth, self.groundtruth_epsilon, details
         else:
             return False

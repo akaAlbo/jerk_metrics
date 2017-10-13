@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.8.2
+@version: 1.9.0
 """
 
 import csv
@@ -157,8 +157,9 @@ class JerkEvaluation:
         """
 
         if show == 1:
-            plt.figure(self.n, figsize=(16.0, 10.0))
-            plt.subplot(211)
+            fig = plt.figure(self.n, figsize=(16.0, 10.0))
+            # plt.subplot(211)
+            ax1 = fig.add_subplot(211)
             plt.plot(xAxis, yAxis1, 'r', label=legendLabel1)
             plt.title(title, fontsize=20)
             plt.ylabel(yLabel1, fontsize=20)
@@ -167,7 +168,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            plt.subplot(212)
+            # plt.subplot(212)
+            ax2 = fig.add_subplot(212)
             plt.plot(xAxis, yAxis2, 'g', label=legendLabel2)
             plt.xlabel(xLabel, fontsize=20)
             plt.ylabel(yLabel2, fontsize=20)
@@ -176,6 +178,8 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
+            self.annotate_max(xAxis, yAxis1, 'v', ax1)
+            self.annotate_max(xAxis, yAxis2, 'j', ax2)
             plt.savefig(
                 self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
@@ -184,6 +188,29 @@ class JerkEvaluation:
             self.n += 1
         else:
             pass
+
+    def annotate_max(self, x, y, unit, ax=None):
+        '''
+        adds a text-box to the plot with the max value for 'j' or 'v' printed out, form: 't=x, v=x'
+        :param x: x-axis values
+        :param y: y-axis values
+        :param unit: defines the unit of the plot, i.e. 'v' or 'j'
+        :param ax: plot axis on which the text box is added
+        '''
+        xmax = x[np.argmax(y)]
+        ymax = y.max()
+        x_max_string = '{:.3f}'.format(xmax)
+        y_max_string = '{:.3f}'.format(ymax)
+        text = '$\mathrm{t}=' + x_max_string + ',\;' + '\mathrm{' + unit + '_{max}}=' + y_max_string + '$'
+        if not ax:
+            ax = plt.gca()
+        bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+        # arrowprops = dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=60")
+        # kw = dict(xycoords='data', textcoords="axes fraction",
+        #           arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+        kw = dict(xycoords='data', textcoords="axes fraction",
+                  bbox=bbox_props, ha="left", va="top", size='x-large')
+        ax.annotate(text, xy=(xmax, ymax), xytext=(0.01, 0.96), **kw)
 
     # plot the specified figures
     def show_figures(self):
@@ -248,7 +275,7 @@ class JerkEvaluation:
                            self.A_grad_smo_jerk, '$\mathrm{v_{A}}$', '$\mathrm{j_{smooth,30}}$', 'Time [s]',
                            '$\mathrm{v\;[m/s]}$', '$\mathrm{j\;[m/s^3]}$', 'Velocity and Jerk', show=1)
 
-        # files are saved but not shown directly in when program is executed
+        # files are saved but not shown directly when program is executed
         # plt.show()
 
     # plot smoothing comparison between 1x and 2x smoothing
@@ -349,6 +376,11 @@ class JerkEvaluation:
 
     # read data from .csv-file
     def read_data_csv(self, filename):
+        '''
+        read data from a given csv-file
+        :param filename: path to csv-file
+        :return: --
+        '''
         # global A
         global m_A
         global n_A
@@ -397,6 +429,11 @@ class JerkEvaluation:
         self.A = A
 
     def read_data_subscriber(self, topic):
+        '''
+        read data from a topic and save it in array
+        :param topic: topic to read data from
+        :return: --
+        '''
         # global A
         global m_A
         global n_A
@@ -422,6 +459,13 @@ class JerkEvaluation:
 
     # read data directly from a bagfile
     def read_data_bagfile(self, bagname, exclude=None, include='/base/odometry_controller/odometry'):
+        '''
+        read data from a bagfile generated with ros
+        :param bagname: path to bagfile
+        :param exclude: exclude topics (regular expression possible)
+        :param include: include topics (regular expression possible)
+        :return: --
+        '''
         global m_A
         global n_A
 
