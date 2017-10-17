@@ -1,4 +1,6 @@
 # Jerk Metrics
+![Python Version](jerk/badges/python-2.7.6-blue.svg)
+
 Writing a python programm to get the `/base/odometry_controller`-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
 
 ## Usage
