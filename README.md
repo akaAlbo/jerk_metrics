@@ -1,6 +1,6 @@
 # Jerk Metrics
 ![Python Version](jerk/badges/python-2.7.6-blue.svg)
-[![GitHub commit activity the past week, 4 weeks, yea](https://img.shields.io/github/commit-activity/w/ipa-flg-ma/jerk_metrics.svg)](https://github.com/ipa-flg-ma/jerk_metrics)
+[![GitHub commit activity the past week, 4 weeks, yea](https://img.shields.io/github/commit-activity/4w/ipa-flg-ma/jerk_metrics.svg)](https://github.com/ipa-flg-ma/jerk_metrics)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/ipa-flg-ma/jerk_metrics.svg)](https://github.com/ipa-flg-ma/jerk_metrics)
 
 Writing a python programm to get the `/base/odometry_controller`-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
