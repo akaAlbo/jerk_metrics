@@ -1,15 +1,35 @@
+Table of Contents
+=================
+
+   * [Jerk Metrics](#jerk-metrics)
+      * [Usage](#usage)
+         * [Plots](#plots)
+         * [ROS Subscriber Support](#ros-subscriber-support)
+         * [.csv-Files](#csv-files)
+         * [Terminal](#terminal)
+         * [Bandwidth](#bandwidth)
+      * [History](#history)
+   * [HOW-TO New Metric](#how-to-new-metric)
+         * [Python File](#python-file)
+         * [ATF Presenter](#atf-presenter)
+   * [Setting up new ATF test](#setting-up-new-atf-test)
+
 # Jerk Metrics
+![Python Version](jerk/badges/python-2.7.6-blue.svg)
+[![GitHub commit activity the past week, 4 weeks, yea](https://img.shields.io/github/commit-activity/4w/ipa-flg-ma/jerk_metrics.svg)](https://github.com/ipa-flg-ma/jerk_metrics)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/ipa-flg-ma/jerk_metrics.svg)](https://github.com/ipa-flg-ma/jerk_metrics)
+
 Writing a python programm to get the `/base/odometry_controller`-speed and use it for data analytics. Concerning max allowed jerk in velocity-profile.
 
 ## Usage
 ### Plots
-All generated plots are saved as pdf-file for further usage. All plots are saved in subfolder `/Data/*Timestamp*` (folder is created automatically), 
+All generated plots are saved as pdf-file for further usage. All plots are saved in subfolder `/Data/*Timestamp*` (folder is created automatically),
 named according to plotted data including timestamp. See example:
 ![Jerk comparison example plot](https://github.com/ipa-flg-ma/SciPy_Test/blob/master/jerk_comparison.png)
 
 
 ### ROS Subscriber Support
-Included subscriber to ROS-topic 
+Included subscriber to ROS-topic
 ```
 /base/odometry_controller/
 ```
@@ -76,8 +96,8 @@ Max allowed jerk is given as bandwidth above which jerk should not go.
 - text box in plots is shown with `v` or `j` max values, and  `time` at which they occur
 
 **V 1.8.1:**
-- solved problem with existing directory if multiple bagfiles or csv-files were evaluated in short time 
-(i.e. timestamp hasn't changed since last evaluated file --> problem with creating directory because it already 
+- solved problem with existing directory if multiple bagfiles or csv-files were evaluated in short time
+(i.e. timestamp hasn't changed since last evaluated file --> problem with creating directory because it already
 exists).
 - now possible to evaluated many bagfiles or csv-files in short time
 
@@ -175,7 +195,7 @@ from atf_metrics.calculate_*name* import Calculate*Name*, Calculate*Name*ParamHa
 from atf_metrics.calculate_jerk import CalculateJerk, CalculateJerkParamHandler
 ```
   here *name* stands for the name of your new metric (obviously).
-  
+
 - In file ```atf/src/atf/atf_metrics/config/metrics.yaml``` add:
 ```
 *name*:
@@ -267,7 +287,7 @@ test_project/
  - `application.launch`:
    `launch`-file includes information about the ROS configs (e.g. 'saturn-ingolstadt' or 'ipa-apartment' environment config),
    and includes gazebo and RVIZ startup
- 
+
 2. config:
   - robot_envs:
 ```yaml
@@ -288,7 +308,7 @@ additional_arguments: []                              # Name and value of additi
 ```
    In the `robot1.yaml` you can define topics which are included when the corresponding metric (e.g. "goal") is running
    (i.e. topics you need to **collect data** from for further calculations).
-   
+
   - test_configs:
 ```yaml
 testblock_nav:
@@ -312,8 +332,8 @@ testblock_nav:
       groundtruth: 33
       groundtruth_epsilon: 5
 ```
-  In the `test1.yaml` you define the different metrics, the groundtruth and groundtruth epsilon for those metrics, 
-  and the topics (if necessary). All the chosen metrics are applied in *one* test-run of ATF. 
+  In the `test1.yaml` you define the different metrics, the groundtruth and groundtruth epsilon for those metrics,
+  and the topics (if necessary). All the chosen metrics are applied in *one* test-run of ATF.
   You can add additional parameters to extend the provided information for the metrics:
 ```yaml
 testblock_nav:
@@ -328,18 +348,18 @@ testblock_nav:
   Those additional parameters have to be collected in the `metrics.py`-file using the following line:
 ```python
     def parse_parameter(self, testblock_name, params):
-    
+
     [...]
-    
+
         metrics.append(CalculateGoal(metric["topic"],
                                      metric["groundtruth_angle"],           # added in 'test.yaml' config in 'test_configs'
                                      metric["groundtruth_angle_epsilon"],   # added in 'test.yaml' config in 'test_configs'
                                      groundtruth,
                                      groundtruth_epsilon))
 ```
-  
+
   | Name | Definition |
   |:------------:|:---------------:|
-  | groundtruth |defines the expected value, example: 5 [m] 
+  | groundtruth |defines the expected value, example: 5 [m]
   | groundtruth_epsilon |defines max allowed +/- for the groundtruth, example: +/- 0,1 [m] |
   | topic |defines subscribed topic |
