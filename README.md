@@ -1,6 +1,7 @@
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [Jerk Metrics](#jerk-metrics)
       * [Usage](#usage)
          * [Plots](#plots)
@@ -10,8 +11,8 @@ Table of Contents
          * [Bandwidth](#bandwidth)
       * [History](#history)
    * [HOW-TO New Metric](#how-to-new-metric)
-         * [Python File](#python-file)
-         * [ATF Presenter](#atf-presenter)
+      * [Python File](#python-file)
+      * [ATF Presenter](#atf-presenter)
    * [Setting up new ATF test](#setting-up-new-atf-test)
 
 # Jerk Metrics
@@ -168,7 +169,7 @@ exists).
 
 # HOW-TO New Metric
 The following steps are needed to implement a new metrics in ATF:
-### Python File
+## Python File
 - Create new python-file for the metrics, using the following nameconvention:
 ```
 calculate_*name*.py
@@ -206,7 +207,8 @@ from atf_metrics.calculate_jerk import CalculateJerk, CalculateJerkParamHandler
 jerk:
   handler: CalculateJerkParamHandler
 ```
-### ATF Presenter
+
+## ATF Presenter
 - In file ```atf/atf_presenter/html/js/atf_tools/test_list.js``` add (using "jerk" as an example):
 ```javascript
 var plot_options = {
