@@ -178,8 +178,10 @@ class JerkEvaluation:
                 plt.axis(axSize)
             # legend: loc='best' sets legend to best location
             plt.legend()
-            self.annotate_max(xAxis, yAxis1, 'v', ax1)
-            self.annotate_max(xAxis, yAxis2, 'j', ax2)
+#            self.annotate_max(xAxis, yAxis1, 'v', ax1)
+#            self.annotate_max(xAxis, yAxis2, 'j', ax2)
+            self.annotate_max(xAxis, yAxis1, legendLabel1[9], ax1)
+            self.annotate_max(xAxis, yAxis2, legendLabel2[9], ax2)
             plt.savefig(
                 self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
@@ -252,7 +254,7 @@ class JerkEvaluation:
         self.plot2Subplots(self.A[:, AD.FHS], self.A_grad_acc_smo[:, ],
                            self.A_grad_acc[:, ], '$\mathrm{a_{grad,smoothed}}$', '$\mathrm{a_{grad,noisy}}$',
                            'Time [s]', '$\mathrm{a\;[m/s^2]}$', '$\mathrm{a\;[m/s^2]}$',
-                           'Acceleration', axSize=[0, 80, -.1, 1.0], show=0)
+                           'Acceleration', axSize='auto', show=1)
 
         # plot acceleration x,y separately
         self.plot2Subplots(self.A[:, AD.FHS], self.A_grad_acc_x, self.A_grad_acc_y, '$a_{grad,x}$', '$a_{grad,y}$',
