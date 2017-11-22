@@ -42,7 +42,8 @@ class JerkEvaluation:
         self.n = 1
         # smoothing parameter value [30 is good value]
         self.smo_para = 30
-        self.timeformat = "%d_%m_%Y---%H:%M"
+        # self.timeformat = "%d_%m_%Y---%H:%M"
+        self.timeformat = "%Y_%m_%d---%H:%M"
 
         # path where the data is saved
         self.dirpath = 'Data/' + time.strftime(self.timeformat)
