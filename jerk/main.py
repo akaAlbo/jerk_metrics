@@ -6,7 +6,7 @@ Created on Jul 10, 2017
 @author: flg-ma
 @attention: Jerk Metric
 @contact: marcel.albus@ipa.fraunhofer.de (Marcel Albus)
-@version: 1.9.0
+@version: 1.9.1
 """
 
 import csv
@@ -129,7 +129,7 @@ class JerkEvaluation:
 
             plt.legend(fontsize=15)
             plt.savefig(
-                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -184,7 +184,7 @@ class JerkEvaluation:
             self.annotate_max(xAxis, yAxis1, legendLabel1[9], ax1)
             self.annotate_max(xAxis, yAxis2, legendLabel2[9], ax2)
             plt.savefig(
-                self.dirpath + '/' + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
+                self.dirpath + title.lower().replace(' ', '_') + '_' + time.strftime(self.timeformat) + '.pdf',
                 bbox_inches='tight')
 
             # increment figure number counter
@@ -574,7 +574,7 @@ class JerkEvaluation:
                 else:
                     filepath = self.dirpath + '__' + str(i)
                     os.mkdir(filepath)
-                    self.dirpath = filepath
+                    # self.dirpath = filepath
                     break
         else:
             os.mkdir(self.dirpath)
@@ -653,6 +653,7 @@ class JerkEvaluation:
             print tc.OKBLUE + '=' * (17 + len(self.args.load_csv))
             print 'read csv-file: \'{}\''.format(self.args.load_csv)
             print '=' * (17 + len(self.args.load_csv)) + tc.ENDC
+            self.dirpath = os.path.dirname(self.args.load_csv) + '/'
             self.read_data_csv(self.args.load_csv)
 
         # ... or given bagfile...
@@ -660,6 +661,7 @@ class JerkEvaluation:
             print tc.OKBLUE + '=' * (17 + len(self.args.load_bag))
             print 'read bag-file: \'{}\''.format(self.args.load_bag)
             print '=' * (17 + len(self.args.load_bag)) + tc.ENDC
+            self.dirpath = os.path.dirname(self.args.load_bag) + '/'
             self.read_data_bagfile(self.args.load_bag)
 
 
